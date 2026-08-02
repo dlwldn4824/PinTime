@@ -1,0 +1,26 @@
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import './index.css'
+import App from './App.tsx'
+import { clearAllPinTimeData } from './lib/storage'
+
+// http://localhost:5173/?reset=1 → 로컬 테스트 기록 초기화
+if (typeof window !== 'undefined') {
+  const params = new URLSearchParams(window.location.search)
+  if (params.get('reset') === '1') {
+    const removed = clearAllPinTimeData()
+    params.delete('reset')
+    const next = `${window.location.pathname}${params.toString() ? `?${params}` : ''}${window.location.hash}`
+    window.history.replaceState({}, '', next)
+    console.info('[PinTime] local data cleared', removed)
+  }
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+)

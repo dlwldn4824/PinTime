@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>kakao conflict export</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #e8eef5;
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      .kakao {
+        width: 320px;
+        height: 560px;
+        display: flex;
+        flex-direction: column;
+        border-radius: 0;
+        overflow: hidden;
+        box-shadow: none;
+        border: none;
+        background: #b2c7d9;
+        font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+      }
+      .kakao-status {
+        height: 18px;
+        background: #a8bdd0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 10px;
+        font-size: 9px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.45);
+      }
+      .kakao-header {
+        background: #b2c7d9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      }
+      .kakao-back {
+        width: 22px;
+        height: 22px;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        color: #191919;
+      }
+      .kakao-title {
+        flex: 1;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #191919;
+        margin-right: 22px;
+      }
+      .kakao-body {
+        flex: 1;
+        overflow: hidden;
+        padding: 12px 10px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .kakao-date {
+        align-self: center;
+        background: rgba(0, 0, 0, 0.12);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+      }
+      .msg {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+        max-width: 92%;
+      }
+      .msg.them {
+        align-self: flex-start;
+      }
+      .msg.me {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+      }
+      .avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .avatar.a {
+        background: linear-gradient(145deg, #6b8cff, #3b82f6);
+      }
+      .avatar.b {
+        background: linear-gradient(145deg, #fb923c, #ea580c);
+      }
+      .msg-col {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+      .msg.me .msg-col {
+        align-items: flex-end;
+      }
+      .msg-name {
+        font-size: 11px;
+        font-weight: 600;
+        color: #191919;
+        padding-left: 2px;
+      }
+      .bubble-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+      }
+      .msg.me .bubble-row {
+        flex-direction: row-reverse;
+      }
+      .bubble {
+        position: relative;
+        max-width: 220px;
+        padding: 8px 10px;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #191919;
+        word-break: keep-all;
+      }
+      .bubble.them {
+        background: #fff;
+        border-radius: 3px 14px 14px 14px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+      }
+      .bubble.them::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 0;
+        border-top: 8px solid #fff;
+        border-left: 7px solid transparent;
+      }
+      .bubble.me {
+        background: #fee500;
+        border-radius: 14px 3px 14px 14px;
+      }
+      .bubble.me::before {
+        content: '';
+        position: absolute;
+        right: -5px;
+        top: 0;
+        border-top: 8px solid #fee500;
+        border-right: 7px solid transparent;
+      }
+      .msg-time {
+        font-size: 9px;
+        color: rgba(0, 0, 0, 0.4);
+        white-space: nowrap;
+        padding-bottom: 1px;
+      }
+      .kakao-input {
+        background: #f7f7f7;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+      }
+      .kakao-plus {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1.5px solid #b0b0b0;
+        color: #888;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .kakao-field {
+        flex: 1;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 18px;
+        height: 30px;
+        padding: 0 12px;
+        font-size: 12px;
+        color: #aaa;
+        display: flex;
+        align-items: center;
+      }
+      .kakao-hash {
+        font-size: 18px;
+        color: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="kakao" id="shot">
+      <div class="kakao-status">
+        <span>10:16</span>
+        <span>LTE ▮▮▮</span>
+      </div>
+      <div class="kakao-header">
+        <span class="kakao-back">‹</span>
+        <div class="kakao-title">민수, 영희 · 팀플 A</div>
+      </div>
+      <div class="kakao-body">
+        <div class="kakao-date">2026년 8월 3일 월요일</div>
+        <div class="msg them">
+          <div class="avatar a">민</div>
+          <div class="msg-col">
+            <div class="msg-name">민수</div>
+            <div class="bubble-row">
+              <div class="bubble them">
+                야 너 When2Meet에<br />된다고 표시해놨잖아
+              </div>
+              <span class="msg-time">오전 10:13</span>
+            </div>
+          </div>
+        </div>
+        <div class="msg them">
+          <div class="avatar a">민</div>
+          <div class="msg-col">
+            <div class="msg-name">민수</div>
+            <div class="bubble-row">
+              <div class="bubble them">
+                화요일 3시로 다 잡았는데<br />갑자기 안 된다고?
+              </div>
+              <span class="msg-time">오전 10:14</span>
+            </div>
+          </div>
+        </div>
+        <div class="msg them">
+          <div class="avatar b">영</div>
+          <div class="msg-col">
+            <div class="msg-name">영희</div>
+            <div class="bubble-row">
+              <div class="bubble them">다른 톡방에서 회의 잡혔대 ㅋㅋ</div>
+              <span class="msg-time">오전 10:15</span>
+            </div>
+          </div>
+        </div>
+        <div class="msg me">
+          <div class="msg-col">
+            <div class="bubble-row">
+              <div class="bubble me">
+                아 동아리방에서<br />그 시간 잡혀서…
+              </div>
+              <span class="msg-time">오전 10:15</span>
+            </div>
+          </div>
+        </div>
+        <div class="msg them">
+          <div class="avatar a">민</div>
+          <div class="msg-col">
+            <div class="msg-name">민수</div>
+            <div class="bubble-row">
+              <div class="bubble them">
+                그래서 일정 앱 쓰면<br />더 꼬인다고ㅠ
+              </div>
+              <span class="msg-time">오전 10:16</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="kakao-input">
+        <span class="kakao-plus">+</span>
+        <div class="kakao-field">메시지 입력</div>
+        <span class="kakao-hash">#</span>
+      </div>
+    </div>
+  </body>
+</html>
