@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PinTime 사업 소개서 · 표지 + 5장</title>
+    <title>PinTime 사업 소개서 · 표지 + 4장</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -1067,18 +1067,18 @@
 
       .cover-stage {
         display: grid;
-        grid-template-columns: 0.95fr 1.35fr 0.95fr;
+        grid-template-columns: 1.15fr 1.25fr 0.95fr;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
         min-height: 0;
         margin-top: 6px;
       }
 
       .cover-chat {
-        justify-self: end;
+        justify-self: stretch;
         width: 100%;
-        max-width: 3.05in;
-        transform: rotate(-2.5deg) translateY(10px);
+        max-width: 4in;
+        transform: rotate(-2deg) translateY(8px);
         border-radius: 18px;
         overflow: hidden;
         box-shadow:
@@ -1112,7 +1112,7 @@
       }
 
       .cover-phone {
-        width: min(100%, 3.25in);
+        width: min(100%, 3.35in);
         filter: drop-shadow(0 22px 36px rgba(15, 23, 42, 0.18));
       }
 
@@ -1135,7 +1135,7 @@
       }
 
       .cover-tagline .ai {
-        color: #7c3aed;
+        color: var(--blue);
       }
 
       .cover-foot {
@@ -2074,13 +2074,13 @@
   <body>
     <div class="toolbar">
       <p>
-        <strong>PinTime</strong> · 표지 + 5장 · 문제→AI구조→프로토타입→확정 · 16:9
+        <strong>PinTime</strong> · 표지 + 4장 · 문제→AI구조→프로토타입→확정 · 16:9
       </p>
       <button type="button" onclick="window.print()">인쇄 / PDF 저장</button>
     </div>
 
     <div class="deck">
-      <!-- 표지 -->
+      <!-- 1 · 표지 -->
       <section class="slide cover" id="cover">
         <div class="slide-inner">
           <h1 class="cover-problem">
@@ -2118,61 +2118,12 @@
         </div>
       </section>
 
-      <!-- 1 · 문제+서비스 동시 -->
-      <section class="slide" id="p1">
-        <div class="slide-inner">
-          <div class="eyebrow">
-            <div class="brand"><span class="brand-mark">P</span> PINTIME</div>
-            <div class="page">1 / 5</div>
-          </div>
-          <span class="tape">문제 · 해결</span>
-          <h1 class="slide-title">
-            된다고 칠해둔 그 시간, 다른 톡방에서 이미 잡혀 있다
-          </h1>
-          <p class="slide-lead" style="color:var(--blue);font-weight:600">
-            흩어진 대화와 캘린더를 연결해 약속을 끝까지 잡아주는 AI 일정 에이전트, PinTime
-          </p>
-
-          <div class="hero-bridge">
-            <div class="hero-chat-wrap">
-              <div class="chat-label">흩어진 톡에서 생긴 일정 충돌</div>
-              <div class="hero-chat">
-                <img
-                  src="/pitch-shots/kakao-conflict.png"
-                  alt="When2Meet에 된다고 표시했는데 다른 톡방 일정과 충돌하는 대화"
-                />
-              </div>
-            </div>
-
-            <div class="arrow-col">
-              <div class="flow-arrow">→</div>
-              <div class="pin-orb">P</div>
-              <div class="flow-arrow">→</div>
-            </div>
-
-            <div class="result-card">
-              <span class="rc-tag">확정된 일정</span>
-              <div class="rc-row">
-                <span class="rc-ico">P</span>
-                <h3>팀플 A 3주차 회의</h3>
-              </div>
-              <div class="rc-row">
-                <span class="rc-ico">T</span>
-                <p>화요일 15:00–16:00<br />전원 가능 · 기존 일정 충돌 없음</p>
-              </div>
-              <div class="rc-ok">✓ 캘린더 자동 등록 · 전체 알림</div>
-            </div>
-          </div>
-          <div class="slide-name">이지우</div>
-        </div>
-      </section>
-
       <!-- 2 · 기존 문제 -->
       <section class="slide" id="p2">
         <div class="slide-inner">
           <div class="eyebrow">
             <div class="brand"><span class="brand-mark">P</span> PINTIME</div>
-            <div class="page">2 / 5</div>
+            <div class="page">1 / 4</div>
           </div>
           <span class="tape">기존 조율 툴의 한계</span>
           <h2 class="slide-title">
@@ -2216,7 +2167,7 @@
         <div class="slide-inner">
           <div class="eyebrow">
             <div class="brand"><span class="brand-mark">P</span> PINTIME</div>
-            <div class="page">3 / 5</div>
+            <div class="page">2 / 4</div>
           </div>
           <span class="tape">AI 일정 에이전트</span>
           <h2 class="slide-title">
@@ -2295,7 +2246,7 @@
         <div class="slide-inner">
           <div class="eyebrow">
             <div class="brand"><span class="brand-mark">P</span> PINTIME</div>
-            <div class="page">4 / 5</div>
+            <div class="page">3 / 4</div>
           </div>
           <span class="tape">실제 프로토타입</span>
           <h2 class="slide-title">
@@ -2351,7 +2302,7 @@
         <div class="slide-inner">
           <div class="eyebrow">
             <div class="brand"><span class="brand-mark">P</span> PINTIME</div>
-            <div class="page">5 / 5</div>
+            <div class="page">4 / 4</div>
           </div>
           <span class="tape">결과 · 구현 범위</span>
           <h2 class="slide-title">확정 한 번이면, 캘린더까지 끝</h2>
