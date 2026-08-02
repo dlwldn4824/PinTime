@@ -1144,11 +1144,26 @@
         margin-top: 6px;
       }
 
-      .cover-chat {
+      .cover-chat-wrap {
         justify-self: stretch;
         width: 100%;
         max-width: 4in;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
         transform: rotate(-2deg) translateY(8px);
+      }
+
+      .cover-chat-wrap .chat-label {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--blue);
+        letter-spacing: -0.02em;
+        padding-left: 2px;
+      }
+
+      .cover-chat {
+        width: 100%;
         border-radius: 18px;
         overflow: hidden;
         box-shadow:
@@ -2158,11 +2173,14 @@
           </h1>
 
           <div class="cover-stage">
-            <div class="cover-chat">
-              <img
-                src="/pitch-shots/kakao-conflict.png"
-                alt="일정 충돌이 난 카카오톡 대화"
-              />
+            <div class="cover-chat-wrap">
+              <div class="chat-label">흩어진 톡에서 생긴 일정 충돌</div>
+              <div class="cover-chat">
+                <img
+                  src="/pitch-shots/kakao-conflict.png"
+                  alt="일정 충돌이 난 카카오톡 대화"
+                />
+              </div>
             </div>
 
             <div class="cover-phone-col">
