@@ -429,6 +429,14 @@
         overflow: hidden;
         box-sizing: border-box;
       }
+      .problem-step .step-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+        flex-shrink: 0;
+        min-width: 0;
+      }
       .problem-step .num {
         display: inline-grid;
         place-items: center;
@@ -439,17 +447,17 @@
         font-family: Manrope, sans-serif;
         font-weight: 800;
         font-size: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 0;
         flex-shrink: 0;
       }
       .problem-step h3 {
-        margin: 0 0 12px;
+        margin: 0;
         font-size: 22px;
         line-height: 1.25;
         white-space: nowrap;
         letter-spacing: -0.04em;
-        flex-shrink: 0;
-        max-width: 100%;
+        flex: 1;
+        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
       }
@@ -2314,8 +2322,10 @@
 
           <div class="problem-flow">
             <div class="problem-step">
-              <span class="num">1</span>
-              <h3>톡방마다 다시 공유</h3>
+              <div class="step-head">
+                <span class="num">1</span>
+                <h3>톡방마다 다시 공유</h3>
+              </div>
               <p class="detail">
                 <span class="nowrap">팀플방, 동아리방, 약속방마다 일정 공유 링크를</span><br />
                 새로 만들고 같은 가능 시간을 또 입력합니다.<br />
@@ -2324,8 +2334,10 @@
               <div class="one-line">방마다 링크·가능 시간 재입력</div>
             </div>
             <div class="problem-step">
-              <span class="num">2</span>
-              <h3>충돌 나면 또 조율</h3>
+              <div class="step-head">
+                <span class="num">2</span>
+                <h3>충돌 나면 또 조율</h3>
+              </div>
               <p class="detail">
                 다른 톡방에서 시간이 잡히면 이미 칠해둔<br />
                 표가 무효가 됩니다. 된다고 했던 칸을 지우고,<br />
@@ -2334,8 +2346,10 @@
               <div class="one-line">다른 톡에 잡히면 처음부터 다시</div>
             </div>
             <div class="problem-step bad">
-              <span class="num">3</span>
-              <h3>캘린더에 또 등록</h3>
+              <div class="step-head">
+                <span class="num">3</span>
+                <h3>캘린더에 또 등록</h3>
+              </div>
               <p class="detail">
                 겨우 확정해도 끝은 아닙니다.<br />
                 캘린더 앱에 일정을 따로 넣고 알림까지<br />
