@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PinTime 사업 소개서 · 체크종이 5+1장</title>
+    <title>PinTime 사업 소개서 · 표지 + 5장</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -983,59 +983,117 @@
         pointer-events: none;
       }
 
-      /* ===== COVER ===== */
+      /* ===== COVER (흰 배경 · 폰 중심) ===== */
+      .slide.cover {
+        background-color: #fff;
+        background-image: none;
+        color: #111827;
+      }
+
       .cover .slide-inner {
+        padding: 0.42in 0.55in 0.28in;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 0;
+      }
+
+      .cover-problem {
+        margin: 0;
+        max-width: 6.2in;
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.25;
+        color: #111827;
+      }
+
+      .cover-stage {
+        display: grid;
+        grid-template-columns: 1.05fr 1.15fr 1.1fr;
+        align-items: center;
+        gap: 18px;
+        min-height: 0;
+        margin-top: 10px;
+      }
+
+      .cover-chat {
+        justify-self: end;
+        width: 100%;
+        max-width: 3.35in;
+        transform: rotate(-2.5deg) translateY(6px);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow:
+          0 18px 40px rgba(15, 23, 42, 0.14),
+          0 2px 0 rgba(15, 23, 42, 0.04);
+        background: #fff;
+      }
+
+      .cover-chat img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .cover-phone-col {
+        display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        text-align: center;
-        padding-top: 0.7in;
+        min-height: 0;
+        gap: 10px;
       }
 
-      .cover-kicker {
+      .cover-wordmark {
         font-family: Manrope, sans-serif;
         font-weight: 800;
-        font-size: 22px;
-        letter-spacing: -0.02em;
-        color: var(--blue);
-        margin-bottom: 0.12in;
-        line-height: 1.25;
-      }
-
-      .cover-tape {
-        background: var(--blue);
-        color: #fff;
-        font-size: 20px;
-        font-weight: 700;
-        padding: 10px 28px;
-        margin-bottom: 0.18in;
-        box-shadow: 4px 5px 0 rgba(29, 78, 216, 0.22);
-        transform: rotate(-1deg);
-      }
-
-      .cover-title {
-        background: #fff;
-        border: 3px solid var(--blue);
-        padding: 0.35in 0.7in 0.42in;
-        position: relative;
-        box-shadow: 8px 8px 0 rgba(29, 78, 216, 0.1);
-      }
-
-      .cover-title h1 {
-        font-size: 72px;
-        letter-spacing: 0.02em;
+        font-size: 34px;
+        letter-spacing: -0.03em;
+        color: #0f172a;
         line-height: 1;
       }
 
-      .cover-name {
-        position: absolute;
-        bottom: 0.4in;
-        left: 0;
-        right: 0;
-        text-align: center;
+      .cover-phone {
+        width: min(100%, 2.55in);
+        filter: drop-shadow(0 22px 36px rgba(15, 23, 42, 0.18));
+      }
+
+      .cover-phone img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+
+      .cover-tagline {
+        margin: 0;
+        max-width: 3.6in;
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.4;
+        color: #111827;
+        transform: translateY(-8px);
+      }
+
+      .cover-tagline .ai {
+        color: #7c3aed;
+      }
+
+      .cover-foot {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-top: 4px;
+      }
+
+      .cover-foot .name {
         font-family: Manrope, sans-serif;
         font-weight: 800;
-        font-size: 18px;
-        color: var(--blue);
+        font-size: 14px;
+        color: #64748b;
+        letter-spacing: 0.02em;
       }
 
       /* ===== 카카오톡 UI (유지) ===== */
@@ -1959,12 +2017,50 @@
   <body>
     <div class="toolbar">
       <p>
-        <strong>PinTime</strong> · 5장 재구성 · 문제→AI구조→프로토타입→확정 · 16:9
+        <strong>PinTime</strong> · 표지 + 5장 · 문제→AI구조→프로토타입→확정 · 16:9
       </p>
       <button type="button" onclick="window.print()">인쇄 / PDF 저장</button>
     </div>
 
     <div class="deck">
+      <!-- 표지 -->
+      <section class="slide cover" id="cover">
+        <div class="slide-inner">
+          <h1 class="cover-problem">
+            된다고 칠해둔 그 시간,<br />다른 톡방에서 이미 잡혀 있다
+          </h1>
+
+          <div class="cover-stage">
+            <div class="cover-chat">
+              <img
+                src="/pitch-shots/kakao-conflict.png"
+                alt="일정 충돌이 난 카카오톡 대화"
+              />
+            </div>
+
+            <div class="cover-phone-col">
+              <div class="cover-wordmark">PinTime</div>
+              <div class="cover-phone">
+                <img
+                  src="/pitch-shots/cover-phone.png"
+                  alt="PinTime 앱 화면"
+                />
+              </div>
+            </div>
+
+            <p class="cover-tagline">
+              흩어진 대화와 캘린더를 연결해,<br />
+              약속을 끝까지 잡아주는<br />
+              <span class="ai">AI 일정 에이전트.</span>
+            </p>
+          </div>
+
+          <div class="cover-foot">
+            <div class="name">이지우</div>
+          </div>
+        </div>
+      </section>
+
       <!-- 1 · 문제+서비스 동시 -->
       <section class="slide" id="p1">
         <div class="slide-inner">
