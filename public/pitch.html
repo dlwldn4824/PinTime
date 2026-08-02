@@ -238,6 +238,23 @@
         color: var(--blue-soft);
         line-height: 1;
       }
+      .hero-chat {
+        background: #fff;
+        border: 2.5px solid var(--blue);
+        box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.12);
+        height: 100%;
+        max-height: 4.6in;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero-chat img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top center;
+        display: block;
+      }
       .mini-kakao {
         background: #b2c7d9;
         border: 2px solid var(--blue);
@@ -334,37 +351,13 @@
         opacity: 0.7;
       }
 
-      .problem-layout {
-        display: grid;
-        grid-template-columns: 1.15fr 1fr;
-        gap: 18px;
-        margin-top: 16px;
-        flex: 1;
-        align-items: stretch;
-        min-height: 0;
-      }
-      .problem-chat {
-        background: #fff;
-        border: 2.5px solid var(--blue);
-        box-shadow: 6px 6px 0 rgba(29, 78, 216, 0.12);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-      }
-      .problem-chat img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: top center;
-        display: block;
-        flex: 1;
-      }
       .problem-flow {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-        align-content: start;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-top: 22px;
+        flex: 1;
+        align-content: center;
       }
       .problem-step {
         background: #fff;
@@ -1918,14 +1911,11 @@
           </p>
 
           <div class="hero-bridge">
-            <div class="mini-kakao">
-              <div class="mk-chip">흩어진 톡</div>
-              <div class="mk-title">팀플 · 동아리 · 밥약속 …</div>
-              <div class="mk-b">팀플 언제 가능해?<br /><span class="mk-meta">when2meet.com/?1234</span></div>
-              <div class="mk-b">동아리 회의 타임픽!<br /><span class="mk-meta">timepick.net/s/club</span></div>
-              <div class="mk-b">야 너 된다고 표시해놨잖아<br /><span class="mk-meta">민수 · 팀플 A</span></div>
-              <div class="mk-b me">아 동아리방에서 그 시간 잡혀서…</div>
-              <div class="mk-b">그래서 일정 앱 쓰면 더 꼬인다고ㅠ</div>
+            <div class="hero-chat">
+              <img
+                src="/pitch-shots/kakao-conflict.png"
+                alt="When2Meet에 된다고 표시했는데 다른 톡방 일정과 충돌하는 대화"
+              />
             </div>
 
             <div class="arrow-col">
@@ -1965,34 +1955,27 @@
             일정이 방마다 끊기는 것입니다
           </h2>
 
-          <div class="problem-layout">
-            <div class="problem-chat">
-              <img
-                src="/pitch-shots/kakao-conflict.png"
-                alt="When2Meet에 된다고 표시했는데 다른 톡방 일정과 충돌하는 대화"
-              />
+          <div class="problem-flow">
+            <div class="problem-step">
+              <span class="num">1</span>
+              <h3>톡방마다<br />새 링크 생성</h3>
+              <div class="one-line">10개의 일정 공유 링크</div>
             </div>
-            <div class="problem-flow">
-              <div class="problem-step">
-                <span class="num">1</span>
-                <h3>톡방마다 새 링크 생성</h3>
-                <div class="one-line">10개의 일정 공유 링크</div>
-              </div>
-              <div class="problem-step">
-                <span class="num">2</span>
-                <h3>같은 가능 시간을 반복 입력</h3>
-                <div class="one-line">10번의 가능 시간 입력</div>
-              </div>
-              <div class="problem-step bad">
-                <span class="num">3</span>
-                <h3>다른 톡방과 일정 충돌</h3>
-                <div class="one-line">10개 이상의 톡방 간 충돌 조정</div>
-              </div>
-              <div class="problem-conclude">
-                기존 서비스는 한 번의 조율은 편하게 만들지만,<br />
-                <b style="color:var(--blue)">여러 약속 사이의 관계는 기억하지 못합니다.</b>
-              </div>
+            <div class="problem-step">
+              <span class="num">2</span>
+              <h3>같은 가능 시간을<br />반복 입력</h3>
+              <div class="one-line">10번의 가능 시간 입력</div>
             </div>
+            <div class="problem-step bad">
+              <span class="num">3</span>
+              <h3>다른 톡방과<br />일정 충돌</h3>
+              <div class="one-line">10개 이상의 톡방 간 충돌 조정</div>
+            </div>
+          </div>
+
+          <div class="problem-conclude">
+            기존 서비스는 한 번의 조율은 편하게 만들지만,<br />
+            <b style="color:var(--blue)">여러 약속 사이의 관계는 기억하지 못합니다.</b>
           </div>
         </div>
       </section>
