@@ -733,7 +733,7 @@
         position: absolute;
         left: 16%;
         right: 16%;
-        top: 42px;
+        top: 40px;
         height: 3px;
         background: linear-gradient(
           90deg,
@@ -764,27 +764,16 @@
         background: #fff;
         border: 3px solid var(--blue);
         box-shadow: 0 8px 18px rgba(29, 78, 216, 0.12);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
+        display: grid;
+        place-items: center;
       }
       .outcome-orbs .feat .orb .n {
-        font-family: Manrope, sans-serif;
-        font-weight: 800;
-        font-size: 11px;
-        letter-spacing: 0.04em;
-        color: var(--blue-soft);
-        line-height: 1;
-      }
-      .outcome-orbs .feat .orb .stage {
-        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
-        font-weight: 800;
-        font-size: 13px;
+        font-family: 'Gumi Romance', 'IBM Plex Sans KR', sans-serif;
+        font-weight: 400;
+        font-size: 28px;
+        letter-spacing: 0.02em;
         color: var(--blue);
-        line-height: 1.15;
-        padding: 0 6px;
+        line-height: 1;
       }
       .outcome-orbs .feat h4 {
         margin: 0;
@@ -2414,7 +2403,6 @@
             <div class="feat">
               <div class="orb">
                 <span class="n">01</span>
-                <span class="stage">마스킹</span>
               </div>
               <h4>자동 마스킹</h4>
               <p>
@@ -2425,7 +2413,6 @@
             <div class="feat">
               <div class="orb">
                 <span class="n">02</span>
-                <span class="stage">중복방지</span>
               </div>
               <h4>중복 방지</h4>
               <p>
@@ -2436,7 +2423,6 @@
             <div class="feat">
               <div class="orb">
                 <span class="n">03</span>
-                <span class="stage">등록</span>
               </div>
               <h4>캘린더 자동 등록</h4>
               <p>
