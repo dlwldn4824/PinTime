@@ -578,8 +578,13 @@
         object-fit: cover;
         object-position: top center;
         width: 100%;
-        background: #f8fafc;
+        background: #fff;
         display: block;
+      }
+      .proto-card .shot.shot-fit-x {
+        object-fit: contain;
+        object-position: center;
+        background: #fff;
       }
       .proto-card .cap {
         padding: 8px 10px;
@@ -2157,7 +2162,7 @@
             <div class="proto-card">
               <div class="ph"><span class="badge">03</span><b>추천 &amp; JSON 공유</b></div>
               <img
-                class="shot"
+                class="shot shot-fit-x"
                 src="/pitch-shots/proto-03-json.png"
                 alt="공통 시간표와 JSON 복사·붙여넣기"
               />
