@@ -697,14 +697,104 @@
         outline-offset: 1px;
       }
 
+      .outcome-orbs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        margin-top: 12px;
+        flex-shrink: 0;
+        position: relative;
+        padding: 0 10px;
+      }
+      .outcome-orbs::before {
+        content: '';
+        position: absolute;
+        left: 16%;
+        right: 16%;
+        top: 42px;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--blue-pale),
+          var(--blue-soft),
+          var(--blue)
+        );
+        border-radius: 999px;
+        z-index: 0;
+      }
+      .outcome-orbs .feat {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 7px;
+        position: relative;
+        z-index: 1;
+      }
+      .outcome-orbs .feat .orb {
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid var(--blue);
+        box-shadow: 0 8px 18px rgba(29, 78, 216, 0.12);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+      }
+      .outcome-orbs .feat .orb .n {
+        font-family: Manrope, sans-serif;
+        font-weight: 800;
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        color: var(--blue-soft);
+        line-height: 1;
+      }
+      .outcome-orbs .feat .orb .stage {
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
+        font-weight: 800;
+        font-size: 13px;
+        color: var(--blue);
+        line-height: 1.15;
+        padding: 0 6px;
+      }
+      .outcome-orbs .feat h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--blue);
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
+      }
+      .outcome-orbs .feat p {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.4;
+        color: var(--muted-solid);
+        font-weight: 600;
+        max-width: 3.2in;
+      }
+
       .final-flow {
         display: grid;
         grid-template-columns: 1.15fr 0.55fr 1.15fr;
         gap: 12px;
-        margin-top: 10px;
+        margin-top: 14px;
         flex: 1;
         min-height: 0;
         align-items: stretch;
+      }
+      .final-flow .proto-card .shot {
+        height: 2.55in;
+        max-height: 2.55in;
+      }
+      .final-flow .proto-card .cap {
+        min-height: 0;
       }
       .final-cta {
         display: flex;
@@ -722,33 +812,6 @@
         text-align: center;
         box-shadow: 4px 4px 0 rgba(29, 78, 216, 0.2);
         border: 2px solid #1e3a8a;
-      }
-      .pill-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
-        margin-top: 12px;
-      }
-      .pill-row .feat {
-        background: #fff;
-        border: 2.5px solid var(--blue);
-        box-shadow: 4px 4px 0 rgba(29, 78, 216, 0.1);
-        padding: 12px 14px;
-        min-height: 0;
-      }
-      .pill-row .feat h4 {
-        margin: 0 0 6px;
-        font-size: 15px;
-        font-weight: 800;
-        color: var(--blue);
-        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
-      }
-      .pill-row .feat p {
-        margin: 0;
-        font-size: 12px;
-        line-height: 1.45;
-        color: var(--muted-solid);
-        font-weight: 600;
       }
 
       .note-box {
@@ -2309,12 +2372,48 @@
           <span class="tape">결과 · 구현 범위</span>
           <h2 class="slide-title">확정 한 번이면, 캘린더까지 끝</h2>
 
+          <div class="outcome-orbs">
+            <div class="feat">
+              <div class="orb">
+                <span class="n">01</span>
+                <span class="stage">마스킹</span>
+              </div>
+              <h4>자동 마스킹</h4>
+              <p>
+                이미 잡힌 일정·가예약 시간은 다른 조율 공유표에서 자동으로
+                가려져, 처음부터 불가능한 칸을 고르지 않게 합니다.
+              </p>
+            </div>
+            <div class="feat">
+              <div class="orb">
+                <span class="n">02</span>
+                <span class="stage">중복방지</span>
+              </div>
+              <h4>중복 방지</h4>
+              <p>
+                한 방에서 확정된 시간이 다른 방의 가능 시간과 겹치지 않도록
+                이어 주어, 톡방 간 약속 충돌을 줄입니다.
+              </p>
+            </div>
+            <div class="feat">
+              <div class="orb">
+                <span class="n">03</span>
+                <span class="stage">등록</span>
+              </div>
+              <h4>캘린더 자동 등록</h4>
+              <p>
+                공통 시간을 확정하는 순간 내 캘린더에 바로 저장되고, 전날
+                알림까지 연결되어 조율이 약속으로 끝납니다.
+              </p>
+            </div>
+          </div>
+
           <div class="final-flow">
             <div class="proto-card" style="min-height:0">
               <div class="ph"><span class="badge">AI</span><b>추천 일정 카드</b></div>
               <img
                 class="shot"
-                src="/pitch-shots/agent-result.png"
+                src="/pitch-shots/ai-03-confirm.png"
                 alt="AI가 추천한 일정 확정 화면"
                 style="object-position: center top"
               />
@@ -2327,32 +2426,13 @@
             </div>
             <div class="proto-card" style="min-height:0">
               <div class="ph"><span class="badge">✓</span><b>캘린더 자동 추가</b></div>
-              <img class="shot" src="/pitch-shots/calendar.png" alt="캘린더에 등록된 일정" />
+              <img
+                class="shot"
+                src="/pitch-shots/proto-02-mask.png"
+                alt="캘린더에 등록된 일정"
+                style="object-position: center top"
+              />
               <div class="cap">확정 즉시 주간 캘린더에 일정이 저장됩니다.</div>
-            </div>
-          </div>
-
-          <div class="pill-row">
-            <div class="feat">
-              <h4>자동 마스킹</h4>
-              <p>
-                이미 잡힌 일정·가예약 시간은 다른 조율 공유표에서 자동으로
-                가려져, 처음부터 불가능한 칸을 고르지 않게 합니다.
-              </p>
-            </div>
-            <div class="feat">
-              <h4>중복 방지</h4>
-              <p>
-                한 방에서 확정된 시간이 다른 방의 가능 시간과 겹치지 않도록
-                이어 주어, 톡방 간 약속 충돌을 줄입니다.
-              </p>
-            </div>
-            <div class="feat">
-              <h4>캘린더 자동 등록</h4>
-              <p>
-                공통 시간을 확정하는 순간 내 캘린더에 바로 저장되고, 전날
-                알림까지 연결되어 조율이 약속으로 끝납니다.
-              </p>
             </div>
           </div>
         </div>
