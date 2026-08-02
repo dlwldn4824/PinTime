@@ -662,43 +662,31 @@
         border: 2px solid #1e3a8a;
       }
       .pill-row {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 10px;
-        flex-wrap: wrap;
-      }
-      .pill-row span {
-        background: #fff;
-        border: 2px solid var(--blue);
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--blue);
-      }
-      .scope-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 10px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 12px;
       }
-      .scope-row .box {
-        padding: 10px 12px;
-        border: 2px solid var(--blue);
+      .pill-row .feat {
         background: #fff;
+        border: 2.5px solid var(--blue);
+        box-shadow: 4px 4px 0 rgba(29, 78, 216, 0.1);
+        padding: 12px 14px;
+        min-height: 0;
       }
-      .scope-row .box.mvp { background: #eef4ff; }
-      .scope-row .box h4 {
-        margin: 0 0 4px;
-        font-size: 12px;
+      .pill-row .feat h4 {
+        margin: 0 0 6px;
+        font-size: 15px;
         font-weight: 800;
         color: var(--blue);
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
       }
-      .scope-row .box p {
+      .pill-row .feat p {
         margin: 0;
-        font-size: 11px;
-        line-height: 1.4;
+        font-size: 12px;
+        line-height: 1.45;
         color: var(--muted-solid);
+        font-weight: 600;
       }
 
       .note-box {
@@ -2207,19 +2195,26 @@
           </div>
 
           <div class="pill-row">
-            <span>자동 마스킹</span>
-            <span>중복 방지</span>
-            <span>캘린더 자동 등록</span>
-          </div>
-
-          <div class="scope-row">
-            <div class="box mvp">
-              <h4>MVP 구현 (지금 동작)</h4>
-              <p>조율방 생성 · 일정 중첩 확인 · 공통 시간 추천 · 캘린더 저장</p>
+            <div class="feat">
+              <h4>자동 마스킹</h4>
+              <p>
+                이미 잡힌 일정·가예약 시간은 다른 조율 공유표에서 자동으로
+                가려져, 처음부터 불가능한 칸을 고르지 않게 합니다.
+              </p>
             </div>
-            <div class="box">
-              <h4>AI 고도화 (다음 단계)</h4>
-              <p>톡 대화 분석 · 제약조건 추출 · 자동 약속 확정</p>
+            <div class="feat">
+              <h4>중복 방지</h4>
+              <p>
+                한 방에서 확정된 시간이 다른 방의 가능 시간과 겹치지 않도록
+                이어 주어, 톡방 간 약속 충돌을 줄입니다.
+              </p>
+            </div>
+            <div class="feat">
+              <h4>캘린더 자동 등록</h4>
+              <p>
+                공통 시간을 확정하는 순간 내 캘린더에 바로 저장되고, 전날
+                알림까지 연결되어 조율이 약속으로 끝납니다.
+              </p>
             </div>
           </div>
         </div>
