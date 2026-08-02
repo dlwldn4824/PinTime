@@ -8,9 +8,9 @@ HTML 소개서: [`public/pitch.html`](./public/pitch.html)
 
 ### 1. 문제와 해결을 한눈에
 
-톡방마다 흩어진 When2Meet/타임픽 링크와 일정 충돌 대화를 보여주고, PinTime이 확정 일정까지 이어 주는 한 장입니다.
+「된다고 칠해둔 그 시간, 다른 톡방에서 이미 잡혀 있다」— 방마다 끊긴 조율과 충돌 대화를 보여주고, PinTime이 확정 일정까지 이어 줍니다.
 
-![1. 톡방 10개, 일정은 왜 따로?](./public/pitch-export/01-problem.png)
+![1. 된다고 칠해둔 그 시간, 다른 톡방에서 이미 잡혀 있다](./public/pitch-export/01-problem.png)
 
 ### 2. 기존 조율 툴의 한계
 
