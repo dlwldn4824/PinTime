@@ -576,8 +576,8 @@
       .proto-card .shot {
         flex: 1;
         min-height: 0;
-        height: 3.85in;
-        max-height: 3.85in;
+        height: 3.35in;
+        max-height: 3.35in;
         object-fit: cover;
         object-position: top center;
         width: 100%;
@@ -588,16 +588,24 @@
         object-fit: fill;
         object-position: center top;
         width: 100%;
-        height: 3.85in;
-        max-height: 3.85in;
+        height: 3.35in;
+        max-height: 3.35in;
         background: #f1f5f9;
       }
       .proto-card .cap {
-        padding: 8px 10px;
-        font-size: 12px;
-        line-height: 1.4;
+        padding: 9px 11px 10px;
+        font-size: 11.5px;
+        line-height: 1.45;
         color: var(--muted-solid);
         border-top: 1px solid #dbe3f0;
+        min-height: 0.95in;
+      }
+      .proto-card .cap b {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--blue);
       }
       .proto-mock {
         flex: 1;
@@ -2234,7 +2242,11 @@
                 src="/pitch-shots/proto-01-range.png"
                 alt="방 이름·날짜·시간 범위를 고르는 화면"
               />
-              <div class="cap">날짜와 시간 범위를 고르고 방을 만듭니다.</div>
+              <div class="cap">
+                <b>빈 표부터 다시 쓰지 않습니다</b>
+                방 이름·날짜·시간만 정하면 링크가 바로 열립니다. When2Meet처럼
+                매번 흰 표를 채우는 게 아니라, 조율 범위만 공유하면 됩니다.
+              </div>
             </div>
             <div class="proto-card">
               <div class="ph"><span class="badge">02</span><b>내 일정 자동 반영</b></div>
@@ -2243,7 +2255,11 @@
                 src="/pitch-shots/proto-02-mask.png"
                 alt="분홍·초록으로 표시된 되는 시간 표"
               />
-              <div class="cap">기존 일정과 가예약 시간은 자동으로 제외됩니다.</div>
+              <div class="cap">
+                <b>이미 잡힌 시간은 자동으로 막힙니다</b>
+                캘린더 일정과 다른 방 가예약이 분홍으로 마스킹됩니다. “된다고
+                칠해놓고 다른 톡에서 이미 잡힌” 충돌을 입력 단계에서 끊습니다.
+              </div>
             </div>
             <div class="proto-card">
               <div class="ph"><span class="badge">03</span><b>추천 &amp; JSON 공유</b></div>
@@ -2253,8 +2269,9 @@
                 alt="공통 시간표와 JSON 복사·붙여넣기"
               />
               <div class="cap">
-                캘린더 앱을 깔지 않아도, 1번만 등록하면 JSON으로 다른 일정
-                공유방에 복붙할 수 있습니다.
+                <b>한 번 등록하면 방마다 다시 안 씁니다</b>
+                앱을 안 깔아도 JSON으로 일정을 옮길 수 있고, 확정은 캘린더·알림까지
+                이어집니다. 방마다 끊기던 일정이 한 흐름으로 연결됩니다.
               </div>
             </div>
           </div>

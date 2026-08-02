@@ -32,7 +32,8 @@ HTML 소개서: [`public/pitch.html`](./public/pitch.html) · https://pintime.ve
 
 ### 4. 프로토타입 흐름
 
-방 생성 → 내 일정 자동 반영(마스킹) → 추천 & JSON 공유. 캘린더 앱 없이도 한 번 등록한 일정을 JSON으로 다른 방에 복붙할 수 있습니다.
+방 생성 → 내 일정 자동 반영(마스킹) → 추천 & JSON 공유.  
+빈 표를 다시 쓰지 않고, 기존·가예약을 자동 제외하며, 한 번 등록한 일정을 JSON으로 다른 방에 이어 붙일 수 있습니다.
 
 ![4. 방 생성부터 JSON 공유까지](./public/pitch-export/04-prototype.png)
 
