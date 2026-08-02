@@ -194,12 +194,12 @@
       /* —— 개편 레이아웃 —— */
       .hero-bridge {
         display: grid;
-        grid-template-columns: 1.15fr 0.7fr 1fr;
+        grid-template-columns: 1.35fr 0.6fr 1fr;
         gap: 14px;
         align-items: stretch;
         flex: 1;
         min-height: 0;
-        margin-top: 12px;
+        margin-top: 10px;
       }
       .hero-bridge .arrow-col {
         display: flex;
@@ -242,16 +242,14 @@
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.12);
-        height: 3.9in;
-        max-height: 3.9in;
         overflow: hidden;
         padding: 0;
+        align-self: center;
+        width: 100%;
       }
       .hero-chat img {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
+        height: auto;
         display: block;
       }
       .mini-kakao {
@@ -306,12 +304,11 @@
         border: 2.5px solid var(--blue);
         box-shadow: 6px 6px 0 rgba(29, 78, 216, 0.12);
         padding: 16px 18px;
-        height: 3.9in;
-        max-height: 3.9in;
         display: flex;
         flex-direction: column;
         justify-content: center;
         gap: 8px;
+        align-self: stretch;
       }
       .result-card .rc-tag {
         align-self: flex-start;
