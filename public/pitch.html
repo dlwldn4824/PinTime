@@ -817,7 +817,12 @@
         line-height: 1.4;
         color: var(--muted-solid);
         font-weight: 600;
-        max-width: 3.2in;
+        max-width: 3.35in;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+      }
+      .outcome-orbs .feat p .nowrap {
+        white-space: nowrap;
       }
 
       .final-flow {
@@ -2496,7 +2501,7 @@
               <p>
                 이미 잡힌 일정·가예약 시간은<br />
                 다른 조율 공유표에서 자동으로 가려져,<br />
-                처음부터 불가능한 칸을 고르지 않게 합니다.
+                <span class="nowrap">처음부터 불가능한 칸을 고르지 않게 합니다.</span>
               </p>
             </div>
             <div class="feat">
