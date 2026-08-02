@@ -2,15 +2,9 @@
 
 캘린더 기반 일정 조율 데모.
 
-## 링크
+[![PinTime](./public/pitch-shots/agent-home.png)](https://pintime.vercel.app)
 
-| | |
-|---|---|
-| **앱** | https://pintime.vercel.app |
-| **소개서 HTML** | https://pintime.vercel.app/pitch.html |
-| **GitHub** | https://github.com/dlwldn4824/pintime |
-
-소개서 소스: [`public/pitch.html`](./public/pitch.html)
+[![소개서](./public/pitch-shots/kakao-conflict.png)](https://pintime.vercel.app/pitch.html)
 
 ## 실행
 
@@ -18,8 +12,6 @@
 npm install
 npm run dev
 ```
-
-로컬에서 소개서만 보려면: http://localhost:5173/pitch.html
 
 ## 화면
 
