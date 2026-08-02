@@ -419,12 +419,15 @@
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.1);
-        padding: 28px 22px 24px;
+        padding: 28px 20px 22px;
         position: relative;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        min-width: 0;
         min-height: 0;
+        overflow: hidden;
+        box-sizing: border-box;
       }
       .problem-step .num {
         display: inline-grid;
@@ -441,28 +444,39 @@
       }
       .problem-step h3 {
         margin: 0 0 12px;
-        font-size: 24px;
+        font-size: 22px;
         line-height: 1.25;
         white-space: nowrap;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
         flex-shrink: 0;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       .problem-step .detail {
         margin: 0;
         flex: 1;
+        min-width: 0;
         font-size: 14.5px;
         line-height: 1.55;
         color: var(--muted-solid);
         font-weight: 500;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
       }
       .problem-step .one-line {
-        font-size: 14px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        font-size: 13.5px;
         font-weight: 700;
         color: #b45309;
         background: #fef3c7;
-        padding: 12px 14px;
+        padding: 12px 12px;
         margin-top: 18px;
         flex-shrink: 0;
+        word-break: keep-all;
+        overflow-wrap: anywhere;
       }
       .problem-step.bad .num { background: #dc2626; }
       .problem-step.bad { border-color: #dc2626; }
