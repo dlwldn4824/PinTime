@@ -1497,6 +1497,10 @@
       }
 
       .cover-tagline {
+        position: absolute;
+        top: 50%;
+        right: 0.5in;
+        transform: translateY(-50%);
         margin: 0;
         max-width: 5.4in;
         font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
@@ -1505,9 +1509,7 @@
         letter-spacing: -0.04em;
         line-height: 1.36;
         color: #1e3a8a;
-        align-self: center;
-        justify-self: start;
-        transform: translate(-4px, 125px);
+        z-index: 2;
         word-break: keep-all;
         overflow-wrap: normal;
       }
@@ -2535,13 +2537,13 @@
                 />
               </div>
             </div>
-
-            <p class="cover-tagline">
-              <span class="line">조율·확정·캘린더 등록까지</span><br />
-              <span class="line ai">원터치로 이어 주는</span><br />
-              <span class="line">AI 일정 에이전트.</span>
-            </p>
           </div>
+
+          <p class="cover-tagline">
+            <span class="line">조율·확정·캘린더 등록까지</span><br />
+            <span class="line ai">원터치로 이어 주는</span><br />
+            <span class="line">AI 일정 에이전트.</span>
+          </p>
 
           <div class="cover-foot">
             <div class="name">이지우</div>
