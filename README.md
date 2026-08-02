@@ -2,9 +2,15 @@
 
 캘린더 기반 일정 조율 데모 · AI 일정 에이전트
 
-## 사업 소개서 (5장)
+## 사업 소개서 (표지 + 5장)
 
-HTML 소개서: [`public/pitch.html`](./public/pitch.html)
+HTML 소개서: [`public/pitch.html`](./public/pitch.html) · https://pintime.vercel.app/pitch.html
+
+### 표지
+
+문제 정의 · 충돌 톡 · PinTime 앱 · AI 일정 에이전트 카피를 한 화면에.
+
+![표지](./public/pitch-export/00-cover.png)
 
 ### 1. 문제와 해결을 한눈에
 
