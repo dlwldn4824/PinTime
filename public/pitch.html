@@ -194,46 +194,47 @@
       /* —— 개편 레이아웃 —— */
       .hero-bridge {
         display: grid;
-        grid-template-columns: 1.35fr 0.6fr 1fr;
-        gap: 14px;
+        grid-template-columns: 1.4fr 0.55fr 1fr;
+        gap: 12px;
         align-items: stretch;
-        flex: 1;
+        flex: 0 1 auto;
         min-height: 0;
-        margin-top: 10px;
+        margin-top: 14px;
       }
       .hero-bridge .arrow-col {
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 12px;
+        gap: 6px;
         text-align: center;
-        padding: 8px 4px;
+        padding: 4px 2px;
+        align-self: center;
       }
       .hero-bridge .pin-orb {
-        width: 110px;
-        height: 110px;
+        width: 72px;
+        height: 72px;
         border-radius: 50%;
-        border: 4px solid var(--blue);
+        border: 3px solid var(--blue);
         background: #fff;
-        box-shadow: 7px 7px 0 rgba(29, 78, 216, 0.18);
+        box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.18);
         display: grid;
         place-items: center;
         font-family: Manrope, sans-serif;
         font-weight: 800;
-        font-size: 48px;
+        font-size: 32px;
         color: var(--blue);
       }
       .hero-bridge .flow-label {
-        font-size: 18px;
+        font-size: 14px;
         font-weight: 800;
         font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
         color: var(--blue);
-        line-height: 1.3;
+        line-height: 1.25;
         letter-spacing: -0.02em;
       }
       .hero-bridge .flow-arrow {
-        font-size: 32px;
+        font-size: 22px;
         font-weight: 800;
         color: var(--blue-soft);
         line-height: 1;
@@ -244,8 +245,8 @@
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.12);
         overflow: hidden;
         padding: 0;
-        align-self: center;
         width: 100%;
+        line-height: 0;
       }
       .hero-chat img {
         width: 100%;
@@ -303,12 +304,12 @@
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 6px 6px 0 rgba(29, 78, 216, 0.12);
-        padding: 16px 18px;
+        padding: 14px 16px;
         display: flex;
         flex-direction: column;
         justify-content: center;
         gap: 8px;
-        align-self: stretch;
+        min-height: 0;
       }
       .result-card .rc-tag {
         align-self: flex-start;
