@@ -1308,7 +1308,7 @@
 
       .cover-tagline {
         margin: 0;
-        max-width: 3.8in;
+        max-width: 4.6in;
         font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
         font-size: 32px;
         font-weight: 800;
@@ -1316,6 +1316,12 @@
         line-height: 1.35;
         color: #1e3a8a;
         transform: translate(-40px, 105px);
+        word-break: keep-all;
+        overflow-wrap: normal;
+      }
+
+      .cover-tagline .line {
+        white-space: nowrap;
       }
 
       .cover-tagline .ai {
@@ -2296,9 +2302,9 @@
             </div>
 
             <p class="cover-tagline">
-              조율·확정·캘린더 등록까지<br />
-              <span class="ai">원터치로 이어 주는</span><br />
-              AI 일정 에이전트.
+              <span class="line">조율·확정·캘린더 등록까지</span><br />
+              <span class="line ai">원터치로 이어 주는</span><br />
+              <span class="line">AI 일정 에이전트.</span>
             </p>
           </div>
 
