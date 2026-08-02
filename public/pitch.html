@@ -194,6 +194,14 @@
         white-space: nowrap;
       }
 
+      .slide-lead.lead-wrap {
+        white-space: normal;
+        max-width: 11.8in;
+        font-size: 14px;
+        line-height: 1.55;
+        font-weight: 500;
+      }
+
       /* —— 1장: 톡 → PinTime → 확정 (가로) —— */
       .hero-bridge {
         display: grid;
@@ -391,9 +399,10 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 14px;
-        margin-top: 14px;
+        margin-top: 12px;
         flex: 1;
         align-content: center;
+        min-height: 0;
       }
       .problem-step {
         background: #fff;
@@ -2129,6 +2138,13 @@
           <h2 class="slide-title">
             문제는 입력이 아니라, 일정이 방마다 끊기는 것입니다
           </h2>
+          <p class="slide-lead lead-wrap">
+            When2Meet·캘린더 공유 링크는 “한 방의 표”를 채우기엔 편합니다.
+            그런데 팀플·동아리·약속이 동시에 생기면, 톡방마다 새 링크를 만들고
+            같은 가능 시간을 반복 입력해야 합니다. 이미 다른 방에서 잡힌 시간은
+            다음 표에 반영되지 않아, 된다고 칠해둔 칸이 다른 톡에서 다시 충돌합니다.
+            결국 문제는 입력 UI가 아니라, <b style="color:var(--blue)">일정이 방마다 끊겨 서로 기억되지 않는 구조</b>에 있습니다.
+          </p>
 
           <div class="problem-flow">
             <div class="problem-step">
