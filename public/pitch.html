@@ -197,9 +197,10 @@
       .slide-lead.lead-wrap {
         white-space: normal;
         max-width: 11.8in;
-        font-size: 14px;
+        font-size: 15.5px;
         line-height: 1.55;
         font-weight: 500;
+        margin-top: 10px;
       }
 
       /* —— 1장: 톡 → PinTime → 확정 (가로) —— */
@@ -395,56 +396,60 @@
         opacity: 0.7;
       }
 
+      #p2 .slide-inner {
+        gap: 0;
+      }
       .problem-flow {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-        margin-top: 12px;
-        flex: 1;
-        align-content: center;
+        gap: 16px;
+        margin-top: 16px;
+        flex: 0 0 auto;
+        align-content: start;
         min-height: 0;
       }
       .problem-step {
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.1);
-        padding: 18px 16px;
+        padding: 20px 18px 18px;
         position: relative;
       }
       .problem-step .num {
         display: inline-grid;
         place-items: center;
-        width: 28px;
-        height: 28px;
+        width: 30px;
+        height: 30px;
         background: var(--blue);
         color: #fff;
         font-family: Manrope, sans-serif;
         font-weight: 800;
-        font-size: 14px;
-        margin-bottom: 10px;
+        font-size: 15px;
+        margin-bottom: 12px;
       }
       .problem-step h3 {
-        margin: 0 0 8px;
-        font-size: 16px;
+        margin: 0 0 10px;
+        font-size: 19px;
         line-height: 1.3;
       }
       .problem-step .one-line {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 700;
         color: #b45309;
         background: #fef3c7;
-        padding: 8px 10px;
-        margin-top: 12px;
+        padding: 10px 12px;
+        margin-top: 14px;
       }
       .problem-step.bad .num { background: #dc2626; }
       .problem-step.bad { border-color: #dc2626; }
       .problem-conclude {
-        margin-top: auto;
-        padding: 14px 18px;
+        margin-top: 16px;
+        margin-bottom: 0.2in;
+        padding: 16px 20px;
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.1);
-        font-size: 15px;
+        font-size: 17px;
         line-height: 1.5;
         color: var(--ink);
         font-weight: 600;
@@ -2224,6 +2229,7 @@
             기존 서비스는 한 번의 조율은 편하게 만들지만,<br />
             <b style="color:var(--blue)">여러 약속 사이의 관계는 기억하지 못합니다.</b>
           </div>
+          <div class="slide-name">이지우</div>
         </div>
       </section>
 
