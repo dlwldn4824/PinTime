@@ -2,16 +2,15 @@
 
 캘린더 기반 일정 조율 데모.
 
-## 소개서 (HTML)
+## 링크
 
-사업 소개서 슬라이드:
+| | |
+|---|---|
+| **앱** | https://pintime.vercel.app |
+| **소개서 HTML** | https://pintime.vercel.app/pitch.html |
+| **GitHub** | https://github.com/dlwldn4824/pintime |
 
-- **배포본:** https://pintime.vercel.app/pitch.html
-- **소스:** [`public/pitch.html`](./public/pitch.html)
-
-## 앱
-
-- **배포:** https://pintime.vercel.app
+소개서 소스: [`public/pitch.html`](./public/pitch.html)
 
 ## 실행
 
