@@ -1445,12 +1445,12 @@
         align-items: center;
         justify-content: center;
         min-height: 0;
-        gap: 0;
+        gap: 10px;
         align-self: center;
         justify-self: center;
         overflow: visible;
         width: 100%;
-        transform: translateY(60px);
+        transform: translateY(48px);
       }
 
       .cover-phone {
@@ -1470,6 +1470,19 @@
         height: auto;
         object-fit: cover;
         object-position: top center;
+      }
+
+      .cover-phone-caption {
+        margin: 0;
+        max-width: 5.4in;
+        text-align: center;
+        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.35;
+        color: #334155;
+        word-break: keep-all;
       }
 
       .cover-tagline {
@@ -2519,6 +2532,9 @@
                   alt="PinTime 앱 화면"
                 />
               </div>
+              <p class="cover-phone-caption">
+                하… 이런 일정 문제, 어떻게 해결해야 하죠?
+              </p>
             </div>
           </div>
 
