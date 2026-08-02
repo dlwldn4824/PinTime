@@ -112,7 +112,7 @@
       .slide-inner {
         width: 100%;
         height: 100%;
-        padding: 0.5in 0.62in 0.42in;
+        padding: 0.38in 0.55in 0.32in;
         display: flex;
         flex-direction: column;
         position: relative;
@@ -128,7 +128,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 0.18in;
+        margin-bottom: 0.1in;
       }
 
       .brand {
@@ -165,30 +165,33 @@
         display: inline-block;
         background: var(--blue);
         color: #fff;
-        padding: 6px 14px;
-        font-size: 12px;
+        padding: 4px 12px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: -0.01em;
         box-shadow: 3px 3px 0 rgba(29, 78, 216, 0.25);
+        margin-bottom: 2px;
       }
 
-      /* 본문 슬라이드 공통 타이포 */
+      /* 본문 슬라이드 공통 타이포 — 제목 1행 */
       .slide-title {
-        margin: 8px 0 0;
+        margin: 4px 0 0;
         font-family: Manrope, sans-serif;
-        font-size: 34px;
-        line-height: 1.22;
-        letter-spacing: -0.035em;
+        font-size: 26px;
+        line-height: 1.25;
+        letter-spacing: -0.03em;
         font-weight: 800;
         color: var(--blue);
+        white-space: nowrap;
       }
 
       .slide-lead {
-        margin: 8px 0 0;
-        font-size: 15px;
-        line-height: 1.5;
+        margin: 4px 0 0;
+        font-size: 14px;
+        line-height: 1.4;
         color: var(--muted-solid);
-        max-width: 42em;
+        max-width: none;
+        white-space: nowrap;
       }
 
       /* —— 1장: 톡 → PinTime → 확정 (가로) —— */
@@ -199,7 +202,7 @@
         align-items: center;
         flex: 1;
         min-height: 0;
-        margin-top: 18px;
+        margin-top: 12px;
       }
       .hero-chat-wrap {
         display: flex;
@@ -388,7 +391,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 14px;
-        margin-top: 22px;
+        margin-top: 14px;
         flex: 1;
         align-content: center;
       }
@@ -442,7 +445,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 10px;
-        margin-top: 10px;
+        margin-top: 8px;
         flex-shrink: 0;
       }
       .ai-step {
@@ -487,7 +490,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 10px;
-        margin-top: 12px;
+        margin-top: 8px;
         flex: 1;
         min-height: 0;
       }
@@ -511,19 +514,19 @@
       }
       .ai-shot img {
         width: 100%;
-        height: 2.35in;
+        height: 2.55in;
         object-fit: cover;
         object-position: top center;
         display: block;
         background: #f8fafc;
       }
       .ai-centerline {
-        margin: 10px 0 0;
+        margin: 8px 0 0;
         text-align: center;
         font-family: 'Gumi Romance', 'IBM Plex Sans KR', sans-serif;
-        font-size: 18px;
+        font-size: 16px;
         color: var(--blue);
-        padding: 8px 14px;
+        padding: 6px 12px;
         background: #eef4ff;
         border: 2px dashed var(--blue-soft);
         flex-shrink: 0;
@@ -533,7 +536,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
-        margin-top: 12px;
+        margin-top: 10px;
         flex: 1;
         min-height: 0;
       }
@@ -573,8 +576,8 @@
       .proto-card .shot {
         flex: 1;
         min-height: 0;
-        height: 3.55in;
-        max-height: 3.55in;
+        height: 3.85in;
+        max-height: 3.85in;
         object-fit: cover;
         object-position: top center;
         width: 100%;
@@ -636,7 +639,7 @@
         display: grid;
         grid-template-columns: 1.15fr 0.55fr 1.15fr;
         gap: 12px;
-        margin-top: 12px;
+        margin-top: 10px;
         flex: 1;
         min-height: 0;
         align-items: stretch;
@@ -1979,12 +1982,10 @@
             <div class="page">1 / 5</div>
           </div>
           <h1 class="slide-title">
-            된다고 칠해둔 그 시간,<br />
-            다른 톡방에서 이미 잡혀 있다
+            된다고 칠해둔 그 시간, 다른 톡방에서 이미 잡혀 있다
           </h1>
-          <p class="slide-lead" style="max-width:none;white-space:nowrap;color:var(--blue);font-weight:600">
-            흩어진 대화와 캘린더를 연결해 약속을 끝까지 잡아주는 AI 일정 에이전트,
-            PinTime
+          <p class="slide-lead" style="color:var(--blue);font-weight:600">
+            흩어진 대화와 캘린더를 연결해 약속을 끝까지 잡아주는 AI 일정 에이전트, PinTime
           </p>
 
           <div class="hero-bridge">
@@ -2030,8 +2031,7 @@
           </div>
           <span class="tape">기존 조율 툴의 한계</span>
           <h2 class="slide-title">
-            문제는 입력이 아니라,<br />
-            일정이 방마다 끊기는 것입니다
+            문제는 입력이 아니라, 일정이 방마다 끊기는 것입니다
           </h2>
 
           <div class="problem-flow">
@@ -2068,8 +2068,7 @@
           </div>
           <span class="tape">AI 일정 에이전트</span>
           <h2 class="slide-title">
-            PinTime은 흩어진 일정의<br />
-            맥락을 이어줍니다
+            PinTime은 흩어진 일정의 맥락을 이어줍니다
           </h2>
           <p class="slide-lead">
             표만 주는 앱이 아니라,
@@ -2136,8 +2135,7 @@
           </div>
           <span class="tape">실제 프로토타입</span>
           <h2 class="slide-title">
-            프로토타입: 방 생성부터<br />
-            추천 · JSON 공유까지
+            프로토타입: 방 생성부터 추천 · JSON 공유까지
           </h2>
 
           <div class="proto-row">
