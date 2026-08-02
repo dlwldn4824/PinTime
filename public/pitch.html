@@ -1142,27 +1142,29 @@
         pointer-events: none;
       }
 
-      /* ===== COVER (핀테크 블루) ===== */
+      /* ===== COVER (핀테크 블루 · 클린) ===== */
       .slide.cover {
-        background-color: #f4f8ff;
+        background-color: #ffffff;
         background-image:
-          radial-gradient(ellipse 70% 55% at 72% 18%, rgba(59, 130, 246, 0.22), transparent 70%),
-          radial-gradient(ellipse 55% 50% at 12% 88%, rgba(37, 99, 235, 0.14), transparent 65%),
-          linear-gradient(160deg, #eef4ff 0%, #f8fbff 42%, #e8f0fe 100%);
+          radial-gradient(ellipse 80% 70% at 78% 8%, rgba(59, 130, 246, 0.16), transparent 58%),
+          radial-gradient(ellipse 50% 45% at 8% 92%, rgba(29, 78, 216, 0.08), transparent 55%),
+          linear-gradient(180deg, #ffffff 0%, #f7faff 55%, #eef4ff 100%);
         color: var(--ink);
       }
 
       .slide.cover::before {
+        content: none;
+      }
+
+      .slide.cover::after {
         content: '';
         position: absolute;
-        inset: 0;
-        background-image:
-          linear-gradient(rgba(37, 99, 235, 0.045) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(37, 99, 235, 0.045) 1px, transparent 1px);
-        background-size: 32px 32px;
-        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 85%);
-        pointer-events: none;
-        z-index: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #1d4ed8, #3b82f6 55%, #93c5fd);
+        z-index: 2;
       }
 
       .cover .slide-inner {
