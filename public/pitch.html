@@ -1179,26 +1179,14 @@
       }
 
       .cover .slide-inner {
-        padding: 0.36in 0.5in 0;
+        padding: 0.28in 0.5in 0;
         display: grid;
-        grid-template-rows: auto 1fr auto;
+        grid-template-rows: 1fr auto;
         gap: 0;
         overflow: hidden;
         min-height: 0;
         position: relative;
         z-index: 1;
-      }
-
-      .cover-problem {
-        margin: 0;
-        max-width: 7.8in;
-        font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: -0.035em;
-        line-height: 1.28;
-        color: #1e3a8a;
-        transform: translate(4px, 2px);
       }
 
       .cover-stage {
@@ -1207,7 +1195,7 @@
         align-items: center;
         gap: 12px;
         min-height: 0;
-        margin-top: 10px;
+        margin-top: 0;
         overflow: visible;
       }
 
@@ -1477,13 +1465,20 @@
         max-width: 5.34in;
         text-align: left;
         font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
-        font-size: 18px;
+        font-size: 17px;
         font-weight: 700;
         letter-spacing: -0.03em;
-        line-height: 1.35;
+        line-height: 1.4;
         color: #334155;
         word-break: keep-all;
-        transform: none;
+      }
+
+      .cover-chat-caption .hint {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #64748b;
       }
 
       .cover-tagline {
@@ -2470,10 +2465,6 @@
       <!-- 1 · 표지 -->
       <section class="slide cover" id="cover">
         <div class="slide-inner">
-          <h1 class="cover-problem">
-            일정을 다시 공유하고, 다시 잡고,<br />캘린더에 또 넣는 그 반복
-          </h1>
-
           <div class="cover-stage">
             <div class="cover-left">
             <div class="cover-chat-wrap">
@@ -2525,6 +2516,7 @@
               </div>
             </div>
             <p class="cover-chat-caption">
+              <span class="hint">다시 공유하고, 다시 잡고, 또 넣는 그 반복…</span>
               하… 이런 일정 문제, 어떻게 해결해야 하죠?
             </p>
             </div>
