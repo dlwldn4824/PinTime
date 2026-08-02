@@ -194,9 +194,9 @@
       /* —— 개편 레이아웃 —— */
       .hero-bridge {
         display: grid;
-        grid-template-columns: 1.4fr 0.55fr 1fr;
+        grid-template-columns: 1.45fr 0.5fr 1fr;
         gap: 12px;
-        align-items: stretch;
+        align-items: center;
         flex: 0 1 auto;
         min-height: 0;
         margin-top: 14px;
@@ -243,14 +243,19 @@
         background: #fff;
         border: 2.5px solid var(--blue);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.12);
-        overflow: hidden;
+        overflow: visible;
         padding: 0;
         width: 100%;
+        height: auto;
         line-height: 0;
+        align-self: center;
       }
       .hero-chat img {
         width: 100%;
         height: auto;
+        max-height: none;
+        object-fit: contain;
+        object-position: center;
         display: block;
       }
       .mini-kakao {
