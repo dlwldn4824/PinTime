@@ -1236,52 +1236,121 @@
 
       .cover-chat {
         width: 100%;
-        border-radius: 18px;
+        border-radius: 22px;
         overflow: hidden;
-        border: 1.5px solid rgba(37, 99, 235, 0.18);
+        border: 1px solid rgba(60, 60, 67, 0.12);
         box-shadow: 5px 5px 0 rgba(29, 78, 216, 0.12);
         background: #fff;
-        padding: 14px 12px 16px;
+        padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 11px;
-        font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+          'IBM Plex Sans KR', sans-serif;
+      }
+
+      .cover-chat .cios-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 12px 9px;
+        background: rgba(249, 249, 249, 0.92);
+        border-bottom: 0.5px solid rgba(60, 60, 67, 0.18);
+      }
+
+      .cover-chat .cios-bar .cios-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(180deg, #8e8e93, #636366);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        letter-spacing: -0.02em;
+      }
+
+      .cover-chat .cios-bar .cios-title {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #000;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .cover-chat .cios-bar .cios-sub {
+        display: block;
+        font-size: 10px;
+        font-weight: 400;
+        color: rgba(60, 60, 67, 0.6);
+        margin-top: 1px;
+      }
+
+      .cover-chat .cios-body {
+        padding: 10px 10px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        background: #fff;
+      }
+
+      .cover-chat .cios-stamp {
+        align-self: center;
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(60, 60, 67, 0.55);
+        letter-spacing: -0.01em;
+        margin: 4px 0 10px;
       }
 
       .cover-chat .cmsg {
         display: flex;
         align-items: flex-end;
-        gap: 7px;
+        gap: 6px;
         max-width: 100%;
+        margin-top: 2px;
       }
 
       .cover-chat .cmsg.them {
         align-self: flex-start;
+        max-width: 92%;
       }
 
       .cover-chat .cmsg.me {
         align-self: flex-end;
         flex-direction: row-reverse;
+        max-width: 86%;
+        margin-top: 8px;
+      }
+
+      .cover-chat .cmsg.stack {
+        margin-top: 1px;
+      }
+
+      .cover-chat .cmsg.gap {
+        margin-top: 8px;
       }
 
       .cover-chat .cav {
-        width: 32px;
-        height: 32px;
+        width: 26px;
+        height: 26px;
         border-radius: 50%;
         flex-shrink: 0;
         display: grid;
         place-items: center;
-        font-size: 13px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
         color: #fff;
+        margin-bottom: 1px;
       }
 
       .cover-chat .cav.a {
-        background: #3b6ff5;
+        background: linear-gradient(180deg, #5ac8fa, #007aff);
       }
 
       .cover-chat .cav.b {
-        background: #e67a2e;
+        background: linear-gradient(180deg, #ff9f0a, #ff6b00);
       }
 
       .cover-chat .cav.spacer {
@@ -1290,73 +1359,118 @@
 
       .cover-chat .crow {
         display: flex;
-        align-items: flex-end;
-        gap: 5px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
         min-width: 0;
       }
 
       .cover-chat .cmsg.me .crow {
-        flex-direction: row-reverse;
+        align-items: flex-end;
+      }
+
+      .cover-chat .cname {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        padding-left: 10px;
+        line-height: 1.2;
+      }
+
+      .cover-chat .cname.a {
+        color: #007aff;
+      }
+
+      .cover-chat .cname.b {
+        color: #ff6b00;
       }
 
       .cover-chat .cbubble {
         position: relative;
-        padding: 9px 11px;
-        font-size: 13.5px;
-        line-height: 1.45;
-        color: #191919;
+        padding: 8px 12px;
+        font-size: 14px;
+        line-height: 1.35;
         word-break: keep-all;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(15, 35, 80, 0.08);
+        font-weight: 400;
+        letter-spacing: -0.02em;
       }
 
       .cover-chat .cbubble b {
-        font-weight: 800;
-        color: #1e3a8a;
+        font-weight: 700;
       }
 
       .cover-chat .cbubble.them {
-        background: #f3f6fb;
-        border-radius: 4px 16px 16px 16px;
+        background: #e9e9eb;
+        color: #000;
+        border-radius: 18px;
       }
 
-      .cover-chat .cbubble.them.tint-b {
-        background: #fff1e8;
+      .cover-chat .cbubble.them b {
+        color: #000;
       }
 
-      .cover-chat .cbubble.them::before {
+      .cover-chat .cmsg.them.tail .cbubble.them {
+        border-bottom-left-radius: 4px;
+      }
+
+      .cover-chat .cmsg.them.tail .cbubble.them::before {
         content: '';
         position: absolute;
-        left: -5px;
-        top: 0;
-        border-top: 8px solid #f3f6fb;
-        border-left: 7px solid transparent;
+        left: -6px;
+        bottom: 0;
+        width: 16px;
+        height: 20px;
+        background: #e9e9eb;
+        border-bottom-right-radius: 14px;
       }
 
-      .cover-chat .cbubble.them.tint-b::before {
-        border-top-color: #fff1e8;
+      .cover-chat .cmsg.them.tail .cbubble.them::after {
+        content: '';
+        position: absolute;
+        left: -9px;
+        bottom: -1px;
+        width: 9px;
+        height: 18px;
+        background: #fff;
+        border-bottom-right-radius: 9px;
       }
 
       .cover-chat .cbubble.me {
-        background: #fee500;
-        border-radius: 16px 4px 16px 16px;
+        background: #007aff;
+        color: #fff;
+        border-radius: 18px;
+        border-bottom-right-radius: 4px;
       }
 
-      .cover-chat .cbubble.me::before {
+      .cover-chat .cbubble.me b {
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .cover-chat .cmsg.me .cbubble.me::before {
         content: '';
         position: absolute;
-        right: -5px;
-        top: 0;
-        border-top: 8px solid #fee500;
-        border-right: 7px solid transparent;
+        right: -6px;
+        bottom: 0;
+        width: 16px;
+        height: 20px;
+        background: #007aff;
+        border-bottom-left-radius: 14px;
+      }
+
+      .cover-chat .cmsg.me .cbubble.me::after {
+        content: '';
+        position: absolute;
+        right: -9px;
+        bottom: -1px;
+        width: 9px;
+        height: 18px;
+        background: #fff;
+        border-bottom-left-radius: 9px;
       }
 
       .cover-chat .ctime {
-        font-size: 10px;
-        color: rgba(0, 0, 0, 0.38);
-        white-space: nowrap;
-        padding-bottom: 2px;
-        flex-shrink: 0;
+        display: none;
       }
 
       .cover-phone-col {
@@ -2382,40 +2496,48 @@
           <div class="cover-stage">
             <div class="cover-chat-wrap">
               <div class="chat-label">흩어진 톡에서 생긴 일정 충돌</div>
-              <div class="cover-chat" aria-label="일정 충돌이 난 카카오톡 대화">
-                <div class="cmsg them">
-                  <div class="cav a">A</div>
-                  <div class="crow">
-                    <div class="cbubble them">
-                      야 너 <b>When2Meet</b>에 된다고 표시해놨잖아
-                    </div>
-                    <span class="ctime">오전 10:13</span>
+              <div class="cover-chat" aria-label="일정 충돌이 난 iMessage 대화">
+                <div class="cios-bar">
+                  <div class="cios-av">조</div>
+                  <div class="cios-title">
+                    조율방
+                    <span class="cios-sub">A, B, 나</span>
                   </div>
                 </div>
-                <div class="cmsg them">
-                  <div class="cav a">A</div>
-                  <div class="crow">
-                    <div class="cbubble them">
-                      <b>화요일 3시</b>로 다 잡았는데 갑자기 안 된다고?
+                <div class="cios-body">
+                  <div class="cios-stamp">오늘 오전 10:13</div>
+                  <div class="cmsg them stack">
+                    <div class="cav spacer">A</div>
+                    <div class="crow">
+                      <div class="cname a">A</div>
+                      <div class="cbubble them">
+                        야 너 <b>When2Meet</b>에 된다고 표시해놨잖아
+                      </div>
                     </div>
-                    <span class="ctime">오전 10:14</span>
                   </div>
-                </div>
-                <div class="cmsg them">
-                  <div class="cav b">B</div>
-                  <div class="crow">
-                    <div class="cbubble them tint-b">
-                      다른 <b>톡방</b>에서 회의 잡혔대 ㅋㅋ
+                  <div class="cmsg them tail">
+                    <div class="cav a">A</div>
+                    <div class="crow">
+                      <div class="cbubble them">
+                        <b>화요일 3시</b>로 다 잡았는데 갑자기 안 된다고?
+                      </div>
                     </div>
-                    <span class="ctime">오전 10:15</span>
                   </div>
-                </div>
-                <div class="cmsg me">
-                  <div class="crow">
-                    <div class="cbubble me">
-                      아 <b>동아리방</b>에서 그 시간 잡혀서...
+                  <div class="cmsg them tail gap">
+                    <div class="cav b">B</div>
+                    <div class="crow">
+                      <div class="cname b">B</div>
+                      <div class="cbubble them">
+                        다른 <b>톡방</b>에서 회의 잡혔대 ㅋㅋ
+                      </div>
                     </div>
-                    <span class="ctime">오전 10:15</span>
+                  </div>
+                  <div class="cmsg me">
+                    <div class="crow">
+                      <div class="cbubble me">
+                        아 <b>동아리방</b>에서 그 시간 잡혀서...
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
