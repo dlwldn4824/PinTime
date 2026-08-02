@@ -508,7 +508,7 @@
         position: absolute;
         left: 12%;
         right: 12%;
-        top: 46px;
+        top: 44px;
         height: 3px;
         background: linear-gradient(
           90deg,
@@ -528,7 +528,7 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 8px;
+        gap: 6px;
         position: relative;
         z-index: 1;
       }
@@ -536,32 +536,30 @@
         content: none;
       }
       .ai-step .orb {
-        width: 92px;
-        height: 92px;
+        width: 90px;
+        height: 90px;
         border-radius: 50%;
         background: #fff;
         border: 3px solid var(--blue);
         box-shadow: 0 8px 18px rgba(29, 78, 216, 0.12);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2px;
+        display: grid;
+        place-items: center;
       }
       .ai-step .orb .n {
         font-family: 'Gumi Romance', 'IBM Plex Sans KR', sans-serif;
         font-weight: 400;
-        font-size: 18px;
+        font-size: 30px;
         letter-spacing: 0.02em;
         color: var(--blue);
         line-height: 1;
       }
-      .ai-step .orb .stage {
+      .ai-step .stage {
         font-family: Manrope, 'IBM Plex Sans KR', sans-serif;
         font-weight: 800;
-        font-size: 18px;
-        color: var(--blue);
+        font-size: 13px;
+        color: var(--blue-soft);
         line-height: 1.1;
+        letter-spacing: 0.02em;
       }
       .ai-step h3 {
         margin: 0;
@@ -2358,32 +2356,32 @@
             <div class="ai-step">
               <div class="orb">
                 <span class="n">01</span>
-                <span class="stage">입력</span>
               </div>
+              <span class="stage">입력</span>
               <h3>대화 이해</h3>
               <p><span class="nowrap">톡에서 날짜·시간·장소·참여자를</span><br />추출합니다.</p>
             </div>
             <div class="ai-step">
               <div class="orb">
                 <span class="n">02</span>
-                <span class="stage">연결</span>
               </div>
+              <span class="stage">연결</span>
               <h3>내 일정 연결</h3>
               <p>기존 캘린더와 다른 조율방의<br />가예약을 확인합니다.</p>
             </div>
             <div class="ai-step">
               <div class="orb">
                 <span class="n">03</span>
-                <span class="stage">처리</span>
               </div>
+              <span class="stage">처리</span>
               <h3>충돌 자동 제거</h3>
               <p>이미 잡힌 시간은 다른 공유표에서 자동 마스킹합니다.</p>
             </div>
             <div class="ai-step">
               <div class="orb">
                 <span class="n">04</span>
-                <span class="stage">결과</span>
               </div>
+              <span class="stage">결과</span>
               <h3>후보 추천·확정</h3>
               <p>모두가 가능한 시간을 찾아<br />약속까지 확정합니다.</p>
             </div>
