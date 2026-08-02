@@ -1124,10 +1124,12 @@
       }
 
       .cover .slide-inner {
-        padding: 0.42in 0.55in 0.28in;
+        padding: 0.36in 0.5in 0;
         display: grid;
         grid-template-rows: auto 1fr auto;
         gap: 0;
+        overflow: hidden;
+        min-height: 0;
       }
 
       .cover-problem {
@@ -1143,11 +1145,12 @@
 
       .cover-stage {
         display: grid;
-        grid-template-columns: 1fr 1.45fr 0.9fr;
-        align-items: center;
+        grid-template-columns: 0.95fr 1.55fr 0.9fr;
+        align-items: start;
         gap: 10px;
         min-height: 0;
         margin-top: 4px;
+        overflow: hidden;
       }
 
       .cover-chat-wrap {
@@ -1189,30 +1192,38 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
         min-height: 0;
         gap: 0;
+        align-self: stretch;
+        overflow: hidden;
       }
 
       .cover-wordmark {
         font-family: Manrope, sans-serif;
         font-weight: 800;
-        font-size: 45px;
+        font-size: 48px;
         letter-spacing: -0.03em;
         color: #0f172a;
         line-height: 1;
         margin-bottom: 2px;
+        flex-shrink: 0;
       }
 
       .cover-phone {
-        width: min(100%, 3.85in);
+        width: min(100%, 5.6in);
         filter: drop-shadow(0 22px 36px rgba(15, 23, 42, 0.18));
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
       }
 
       .cover-phone img {
         display: block;
         width: 100%;
         height: auto;
+        object-fit: cover;
+        object-position: top center;
       }
 
       .cover-tagline {
