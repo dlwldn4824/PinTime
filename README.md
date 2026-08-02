@@ -26,9 +26,9 @@ HTML 소개서: [`public/pitch.html`](./public/pitch.html)
 
 ### 4. 프로토타입 흐름
 
-방 생성 → 내 일정 자동 반영(마스킹) → 공통 시간 추천까지, 실제 프로토타입 화면 흐름을 보여 줍니다.
+방 생성 → 내 일정 자동 반영(마스킹) → 추천 & JSON 공유. 캘린더 앱 없이도 한 번 등록한 일정을 JSON으로 다른 방에 복붙할 수 있습니다.
 
-![4. 방 생성부터 공통 시간 추천까지](./public/pitch-export/04-prototype.png)
+![4. 방 생성부터 JSON 공유까지](./public/pitch-export/04-prototype.png)
 
 ### 5. 확정과 캘린더 등록
 

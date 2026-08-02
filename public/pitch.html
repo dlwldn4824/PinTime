@@ -508,10 +508,13 @@
       .proto-card .shot {
         flex: 1;
         min-height: 0;
+        height: 3.55in;
+        max-height: 3.55in;
         object-fit: cover;
         object-position: top center;
         width: 100%;
         background: #f8fafc;
+        display: block;
       }
       .proto-card .cap {
         padding: 8px 10px;
@@ -2036,40 +2039,39 @@
           <span class="tape">실제 프로토타입</span>
           <h2 class="slide-title">
             프로토타입: 방 생성부터<br />
-            공통 시간 추천까지
+            추천 · JSON 공유까지
           </h2>
 
           <div class="proto-row">
             <div class="proto-card">
               <div class="ph"><span class="badge">01</span><b>조율 범위 설정</b></div>
-              <div class="proto-mock">
-                <div class="row"><span>방 이름</span><span>팀플 A 3주차</span></div>
-                <div class="row"><span>날짜</span><span>8/4–8/8</span></div>
-                <div class="row"><span>시간</span><span>10:00–22:00</span></div>
-                <div class="btn">방 만들고 내 일정 반영</div>
-              </div>
+              <img
+                class="shot"
+                src="/pitch-shots/proto-01-range.png"
+                alt="방 이름·날짜·시간 범위를 고르는 화면"
+              />
               <div class="cap">날짜와 시간 범위를 고르고 방을 만듭니다.</div>
             </div>
             <div class="proto-card">
               <div class="ph"><span class="badge">02</span><b>내 일정 자동 반영</b></div>
-              <div class="proto-mock">
-                <div class="row"><span>월 14:00</span><div class="slot busy" style="width:48px"></div></div>
-                <div class="row"><span>화 15:00</span><div class="slot free" style="width:48px"></div></div>
-                <div class="row"><span>수 16:00</span><div class="slot busy" style="width:48px"></div></div>
-                <div class="row"><span>목 19:30</span><div class="slot free" style="width:48px"></div></div>
-                <div style="font-size:10px;color:#b91c1c;font-weight:700;">분홍 = 캘린더·가예약으로 자동 제외</div>
-              </div>
+              <img
+                class="shot"
+                src="/pitch-shots/proto-02-mask.png"
+                alt="분홍·초록으로 표시된 되는 시간 표"
+              />
               <div class="cap">기존 일정과 가예약 시간은 자동으로 제외됩니다.</div>
             </div>
             <div class="proto-card">
-              <div class="ph"><span class="badge">03</span><b>공통 시간 추천</b></div>
-              <div class="proto-mock">
-                <div class="row"><span>화 15:00</span><div class="slot pick" style="width:48px"></div></div>
-                <div class="row"><span>목 19:30</span><div class="slot free" style="width:48px"></div></div>
-                <div class="row"><span>금 14:00</span><div class="slot free" style="width:48px"></div></div>
-                <div class="btn" style="background:#15803d">추천 · 전원 가능 2/2</div>
+              <div class="ph"><span class="badge">03</span><b>추천 &amp; JSON 공유</b></div>
+              <img
+                class="shot"
+                src="/pitch-shots/proto-03-json.png"
+                alt="공통 시간표와 JSON 복사·붙여넣기"
+              />
+              <div class="cap">
+                캘린더 앱을 깔지 않아도, 1번만 등록하면 JSON으로 다른 일정
+                공유방에 복붙할 수 있습니다.
               </div>
-              <div class="cap">참여자 가능 시간을 합쳐 후보를 제시합니다.</div>
             </div>
           </div>
         </div>
