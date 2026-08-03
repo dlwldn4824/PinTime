@@ -6,7 +6,8 @@
 When2Meet식 빈 표를 방마다 다시 채우는 반복이 아니라, **한 번 입력한 일정이 다음 조율까지 이어지는** 흐름을 목표로 합니다.
 
 Vite · React 19 · TypeScript · Tailwind 4 · 로컬 `localStorage`  
-라이브: https://pintime.vercel.app · 피치: https://pintime.vercel.app/pitch.html
+라이브 (Netlify): https://zesty-clafoutis-473edf.netlify.app · 피치: https://zesty-clafoutis-473edf.netlify.app/pitch.html  
+라이브 (Vercel): https://pintime.vercel.app · 피치: https://pintime.vercel.app/pitch.html
 
 ---
 
@@ -266,7 +267,7 @@ public/
 1. [Netlify](https://app.netlify.com) → **Add new site** → **Import an existing project**
 2. GitHub 저장소 `dlwldn4824/pintime` 연결
 3. Build settings는 `netlify.toml`이 자동 인식
-4. Deploy → `https://<site-name>.netlify.app`
+4. Deploy → 현재 사이트: https://zesty-clafoutis-473edf.netlify.app
 
 앱: `/` · 피치: `/pitch.html`
 
