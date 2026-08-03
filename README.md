@@ -251,7 +251,35 @@ public/
 | `npm run preview` | 빌드 미리보기 |
 | `npm run lint` | oxlint |
 
-`vercel.json`으로 SPA 폴백·`public` 정적 경로를 배포합니다.
+## Netlify 배포 (프로토타입)
+
+설정은 [`netlify.toml`](./netlify.toml)에 있습니다.
+
+| | |
+|---|---|
+| Build command | `npm run build` |
+| Publish directory | `dist` |
+| SPA | `/*` → `/index.html` (존재하는 `pitch.html` 등은 그대로 서빙) |
+
+### Git 연동 (권장)
+
+1. [Netlify](https://app.netlify.com) → **Add new site** → **Import an existing project**
+2. GitHub 저장소 `dlwldn4824/pintime` 연결
+3. Build settings는 `netlify.toml`이 자동 인식
+4. Deploy → `https://<site-name>.netlify.app`
+
+앱: `/` · 피치: `/pitch.html`
+
+### CLI로 바로 올리기
+
+```bash
+npm run build
+npx netlify-cli login          # 최초 1회
+npx netlify-cli sites:create --name pintime-demo   # 사이트 이름 선택
+npx netlify-cli deploy --prod --dir=dist
+```
+
+Vercel(기존)과 병행해도 됩니다. Netlify는 정적 `dist/`만 올리면 됩니다.
 
 ---
 
