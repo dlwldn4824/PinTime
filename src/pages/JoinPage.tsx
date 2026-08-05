@@ -12,16 +12,19 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { AuthModal } from '../components/AuthModal'
 import { AvailabilityEditor } from '../components/AvailabilityEditor'
+import { CommonSlotsList } from '../components/CommonSlotsList'
 import { OverlayGrid } from '../components/OverlayGrid'
 import { Toast } from '../components/Toast'
 import { useCalendar } from '../context/CalendarContext'
 import { useToast } from '../hooks/useToast'
+import { isHandEditedSource } from '../lib/calendarRoomSync'
 import {
   confirmRoomSlot,
   findParticipant,
   inviteLinkFor,
   makeParticipant,
   resolveRoomAsync,
+  syncLinkFor,
   updateRoomTitle,
   upsertParticipant,
 } from '../lib/room'
@@ -30,6 +33,7 @@ import {
   loadRoomSession,
   saveRoomSession,
 } from '../lib/session'
+import { loadMyRooms } from '../lib/storage'
 import {
   SLOT_STEP_MIN,
   type ConfirmRange,
@@ -67,6 +71,11 @@ export function JoinPage() {
   const [pickedRange, setPickedRange] = useState<ConfirmRange | null>(null)
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
+  const [syncUrl, setSyncUrl] = useState('')
+  const [syncCopied, setSyncCopied] = useState(false)
+  const [showSyncHint, setShowSyncHint] = useState(false)
+  /** 표에서 직접 칠어 저장된 값과 달라진 경우 (캘린더 자동반영 전 확인용) */
+  const [slotsDirty, setSlotsDirty] = useState(false)
 
   const isGuestJoin = searchParams.get('guest') === '1'
 
@@ -102,6 +111,7 @@ export function JoinPage() {
     let cancelled = false
     const encoded = searchParams.get('d')
     const guest = searchParams.get('guest') === '1'
+    const sync = searchParams.get('sync') === '1'
     ;(async () => {
       const resolved = await resolveRoomAsync(roomId, encoded)
       if (cancelled) return
@@ -120,18 +130,39 @@ export function JoinPage() {
           : null,
       )
 
+      // 동기화 링크: 친구 가능시간을 합친 뒤, 주소창을 짧은 로컬 경로로 정리
+      if (sync) {
+        applySession(resolved)
+        setShowSyncHint(false)
+        showToast(
+          `참가자 ${resolved.participants.length}명의 가능 시간을 반영했어요`,
+        )
+        setSearchParams({}, { replace: true })
+        return
+      }
+
       // 타임픽식: 초대 링크(guest=1)는 기존 로그인 무시 → 새 이름 참여
       if (guest) {
         clearRoomSession(resolved.id)
         resetAsGuest()
+        // 방은 로컬에 저장됐으니 긴 d는 버리고 guest만 유지
+        if (encoded) {
+          setSearchParams({ guest: '1' }, { replace: true })
+        }
       } else {
         applySession(resolved)
+        // 호스트/재방문: 긴 d가 주소창에 남아 있으면 짧게 정리
+        if (encoded && !sync) {
+          setSearchParams({}, { replace: true })
+        }
       }
     })()
     return () => {
       cancelled = true
     }
-  }, [roomId, searchParams])
+    // showToast는 안정적이지 않을 수 있어 deps에서 제외
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId, searchParams, setSearchParams])
 
   useEffect(() => {
     if (!room) return
@@ -146,7 +177,11 @@ export function JoinPage() {
         const me = findParticipant(next, session.name, session.password)
         if (me) {
           setMyId(me.id)
-          setMySlots(new Set(me.availableSlots))
+          // 사용자가 표에서 직접 고치는 중이면 캘린더 동기화로 덮지 않음
+          setSlotsDirty((dirty) => {
+            if (!dirty) setMySlots(new Set(me.availableSlots))
+            return dirty
+          })
         }
       })
     }
@@ -159,7 +194,7 @@ export function JoinPage() {
     [myId, room],
   )
 
-  const register = (
+  const register = async (
     slots: SlotKey[],
     source: 'app' | 'manual' | 'paste',
     credName = name,
@@ -180,6 +215,7 @@ export function JoinPage() {
       return
     }
 
+    const cameAsGuest = searchParams.get('guest') === '1'
     const participant = makeParticipant(trimmed, credPassword, slots, {
       id: myId && name.trim() === trimmed ? myId : undefined,
       source,
@@ -199,12 +235,31 @@ export function JoinPage() {
     setMySlots(new Set(result.participant.availableSlots))
     setName(result.participant.name)
     setPassword(credPassword)
+    setSlotsDirty(false)
 
-    // 초대 링크로 들어왔으면 guest 플래그 제거 → 이후엔 이 이름으로 유지
-    if (searchParams.get('guest') === '1') {
-      const next = new URLSearchParams(searchParams)
-      next.delete('guest')
-      setSearchParams(next, { replace: true })
+    // 주소창에서 긴 d·guest 제거 (방은 이미 로컬 저장됨)
+    if (cameAsGuest || searchParams.get('d')) {
+      setSearchParams({}, { replace: true })
+    }
+
+    // When2Meet/타임픽: 서버 없이 친구→호스트로 가능시간을 넘기려면 sync 링크 필요
+    const role = loadMyRooms().find((r) => r.id === result.room.id)?.role
+    const needsHostSync = cameAsGuest || role === 'guest'
+    if (needsHostSync) {
+      try {
+        const url = await syncLinkFor(result.room)
+        setSyncUrl(url)
+        setShowSyncHint(true)
+        setSyncCopied(false)
+      } catch {
+        setShowSyncHint(false)
+      }
+      showToast(
+        cameAsGuest
+          ? `${result.participant.name}님 등록 완료 · 아래 링크를 호스트에게 보내 주세요`
+          : `${result.participant.name}님 시간이 업데이트됐어요 · 호스트에게 다시 전달해 주세요`,
+      )
+      return
     }
 
     showToast(
@@ -253,15 +308,54 @@ export function JoinPage() {
     showToast('새 이름·비밀번호로 참여할 수 있어요')
   }
 
-  const inviteUrl = useMemo(
-    () => (room ? inviteLinkFor(room) : ''),
-    [room],
-  )
+  const [inviteUrl, setInviteUrl] = useState('')
+  useEffect(() => {
+    if (!room) {
+      setInviteUrl('')
+      return
+    }
+    let cancelled = false
+    void inviteLinkFor(room).then((url) => {
+      if (!cancelled) setInviteUrl(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [room])
 
   const openInvitePanel = () => {
     if (!room) return
     setInviteOpen(true)
     setLinkCopied(false)
+  }
+
+  const copySyncLink = async () => {
+    if (!syncUrl) return
+    try {
+      await navigator.clipboard.writeText(syncUrl)
+      setSyncCopied(true)
+      showToast('호스트 전달 링크를 복사했어요')
+      window.setTimeout(() => setSyncCopied(false), 2000)
+    } catch {
+      showToast('복사에 실패했어요')
+    }
+  }
+
+  const nativeShareSync = async () => {
+    if (!syncUrl || !room) return
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${room.title} · 가능 시간`,
+          text: `${name || '참가자'}의 가능 시간을 반영하려면 이 링크를 열어 주세요`,
+          url: syncUrl,
+        })
+        return
+      } catch {
+        // fall through to copy
+      }
+    }
+    await copySyncLink()
   }
 
   const copyInviteLink = async () => {
@@ -324,8 +418,23 @@ export function JoinPage() {
     setName(authName)
     setPassword(authPassword)
     if (!room) return
+
+    const me = findParticipant(room, authName, authPassword)
+    const handEdited =
+      slotsDirty || isHandEditedSource(me?.source)
+    if (handEdited) {
+      const ok = window.confirm(
+        `이 공유 링크의 가능 시간을 직접 수정한 흔적이 있어요.\n\n캘린더 일정 기준으로 덮어쓸까요?\n(이 링크만 따로 둔 것이라면 취소를 눌러 주세요)`,
+      )
+      if (!ok) {
+        showToast('캘린더 반영을 취소했어요 · 이 링크 일정은 그대로예요')
+        return
+      }
+    }
+
     const slots = busyToAvailableSlotsForRoom(schedules, allDay, room)
     setMySlots(new Set(slots))
+    setSlotsDirty(false)
     register(slots, 'app', authName, authPassword)
   }
 
@@ -528,13 +637,18 @@ export function JoinPage() {
             className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-5"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm font-bold text-slate-900">공유 링크</p>
+            <p className="text-sm font-bold text-slate-900">초대 링크</p>
             <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-              타임픽처럼 링크를 연 사람은 항상 <b>새 이름</b>으로 참여합니다.
-              (내 로그인 상태는 유지되지 않아요)
+              지금 참가자들의 가능 시간이 포함됩니다. 친구가 열면{' '}
+              <b>겹치는 시간</b>을 보고 새 이름으로 등록합니다.
             </p>
             <p className="mt-3 break-all rounded-xl bg-slate-50 px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-slate-200">
-              {inviteUrl}
+              {inviteUrl || '링크 만드는 중…'}
+            </p>
+            <p className="mt-2 text-[10px] text-slate-400">
+              {inviteUrl
+                ? `길이 ${inviteUrl.length}자 · 비밀번호는 넣지 않습니다`
+                : '압축 중…'}
             </p>
             <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <button
@@ -565,6 +679,53 @@ export function JoinPage() {
         </div>
       )}
 
+      {showSyncHint && syncUrl && registered && !isGuestJoin && (
+        <section className="shrink-0 rounded-2xl border-2 border-blue-300 bg-blue-50/90 p-3 sm:p-4">
+          <div className="flex items-start gap-2">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+              <Share2 size={16} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-blue-950">
+                호스트에게 가능 시간 전달
+              </p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-blue-900/80">
+                서버가 없어서 호스트 기기에 바로 반영되지 않아요. 아래 링크를
+                카톡 등으로 보내면, 호스트가 열 때 내 가능 시간이 합쳐집니다.
+              </p>
+            </div>
+          </div>
+          <p className="mt-3 break-all rounded-xl bg-white px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-blue-200">
+            {syncUrl}
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              onClick={nativeShareSync}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white"
+            >
+              <Share2 size={15} />
+              호스트에게 공유
+            </button>
+            <button
+              type="button"
+              onClick={copySyncLink}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white"
+            >
+              {syncCopied ? <Check size={15} /> : <Copy size={15} />}
+              {syncCopied ? '복사 완료' : '링크 복사'}
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowSyncHint(false)}
+            className="mt-2 w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-white/70"
+          >
+            나중에 하기
+          </button>
+        </section>
+      )}
+
       {(!registered || isGuestJoin) && (
         <section className="shrink-0 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 p-3 sm:p-4">
           <div className="flex items-start gap-2">
@@ -576,8 +737,8 @@ export function JoinPage() {
                 {isGuestJoin ? '초대 링크로 참여하기' : '새 이름으로 참여하기'}
               </p>
               <p className="mt-0.5 text-[11px] leading-relaxed text-emerald-800/80">
-                이름·비밀번호를 입력한 뒤, 아래에서 일정을 직접 칠거나 앱
-                연동을 누르세요.
+                이름·비밀번호를 정한 뒤, 아래에서 되는 시간을 칠고 등록하세요.
+                등록 후 호스트에게 전달 링크가 나옵니다.
               </p>
             </div>
           </div>
@@ -633,14 +794,35 @@ export function JoinPage() {
             <span className="font-semibold text-slate-900">{name}</span>
             님으로 참여 중
           </p>
-          <button
-            type="button"
-            onClick={handleSwitchAccount}
-            className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
-          >
-            <UserPlus size={12} />
-            새 이름으로 참여
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {loadMyRooms().find((r) => r.id === room.id)?.role === 'guest' && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const url = await syncLinkFor(room)
+                    setSyncUrl(url)
+                    setShowSyncHint(true)
+                    setSyncCopied(false)
+                  } catch {
+                    showToast('전달 링크를 만들지 못했어요')
+                  }
+                }}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+              >
+                <Share2 size={12} />
+                호스트에게 전달
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleSwitchAccount}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+            >
+              <UserPlus size={12} />
+              새 이름으로 참여
+            </button>
+          </div>
         </div>
       )}
 
@@ -650,7 +832,10 @@ export function JoinPage() {
           <AvailabilityEditor
             room={room}
             selected={mySlots}
-            onChange={setMySlots}
+            onChange={(next) => {
+              setMySlots(next)
+              setSlotsDirty(true)
+            }}
             title={myTitle}
           />
         </section>
@@ -664,6 +849,12 @@ export function JoinPage() {
               onSelectRange={setPickedRange}
             />
           </div>
+
+          <CommonSlotsList
+            room={room}
+            selectedRange={activeRange}
+            onPick={setPickedRange}
+          />
 
           <aside className="min-w-0 shrink-0 rounded-xl border border-slate-200 bg-slate-50/80 p-2.5 sm:p-3">
             <p className="text-[11px] font-bold text-slate-700">

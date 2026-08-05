@@ -10,7 +10,8 @@ import { allSlotKeysForRoom } from './slots'
 
 /** 공유용 짧은 페이로드 (긴 필드명·빈 배열 제거) */
 type CompactRoom = {
-  i: string
+  /** 경로의 roomId와 중복이면 생략 가능 */
+  i?: string
   t: string
   c?: number
   m: 'd' | 'w'
@@ -28,10 +29,13 @@ type CompactRoom = {
 type CompactParticipant = {
   i?: string
   n: string
-  w: string
+  /** 비밀번호는 초대/동기화 URL에 넣지 않음 (레거시 호환용 optional) */
+  w?: string
   /** allSlotKeys 인덱스 */
   a?: number[]
   o?: 'a' | 'm' | 'p'
+  /** joinedAt (동기화 시 최신 판별) */
+  j?: number
 }
 
 function dateToCompact(date: string): string {
@@ -79,14 +83,17 @@ export function packRoom(
 ): CompactRoom {
   const includeParticipants = opts?.includeParticipants ?? false
   const sorted = [...(room.dates ?? [])].sort()
+  // 초대 링크: 경로에 id가 있어 i·c 생략. 동기화만 id 포함
   const packed: CompactRoom = {
-    i: room.id,
     t: room.title,
     m: room.mode === 'weekdays' ? 'w' : 'd',
     s: room.startHour,
     e: room.endHour,
   }
-  if (room.createdAt) packed.c = room.createdAt
+  if (includeParticipants) {
+    packed.i = room.id
+    if (room.createdAt) packed.c = room.createdAt
+  }
 
   if (room.mode === 'weekdays') {
     packed.W = DAYS.filter((d) => room.weekdays.includes(d))
@@ -108,10 +115,10 @@ export function packRoom(
         .filter((i): i is number => i !== undefined)
       const row: CompactParticipant = {
         n: p.name,
-        w: p.password,
         a: indices,
+        j: p.joinedAt,
       }
-      if (p.id) row.i = p.id
+      // 비밀번호는 URL에 실지 않음 · id도 동기화에 불필요(이름 기준 병합)
       if (p.source === 'app') row.o = 'a'
       else if (p.source === 'paste') row.o = 'p'
       else if (p.source === 'manual') row.o = 'm'
@@ -122,7 +129,10 @@ export function packRoom(
   return packed
 }
 
-export function unpackRoom(raw: unknown): ShareRoom | null {
+export function unpackRoom(
+  raw: unknown,
+  fallbackId?: string,
+): ShareRoom | null {
   if (!raw || typeof raw !== 'object') return null
   const c = raw as CompactRoom & Record<string, unknown>
 
@@ -131,7 +141,13 @@ export function unpackRoom(raw: unknown): ShareRoom | null {
     return normalizeRoom(c as unknown as ShareRoom)
   }
 
-  if (typeof c.i !== 'string' || typeof c.t !== 'string') return null
+  const id =
+    typeof c.i === 'string' && c.i
+      ? c.i
+      : typeof fallbackId === 'string' && fallbackId
+        ? fallbackId
+        : ''
+  if (!id || typeof c.t !== 'string') return null
 
   let dates: string[] = []
   let weekdays: Day[] = []
@@ -148,7 +164,7 @@ export function unpackRoom(raw: unknown): ShareRoom | null {
   }
 
   const base = normalizeRoom({
-    id: c.i,
+    id,
     title: c.t,
     createdAt: typeof c.c === 'number' ? c.c : Date.now(),
     mode,
@@ -171,9 +187,9 @@ export function unpackRoom(raw: unknown): ShareRoom | null {
     return {
       id: p.i ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
       name: p.n,
-      password: p.w,
+      password: typeof p.w === 'string' ? p.w : '',
       availableSlots: slots,
-      joinedAt: Date.now(),
+      joinedAt: typeof p.j === 'number' ? p.j : Date.now(),
       source,
     }
   })
@@ -251,28 +267,32 @@ export async function encodeRoomAsync(
 
 export async function decodeRoomAsync(
   encoded: string,
+  fallbackId?: string,
 ): Promise<ShareRoom | null> {
   try {
     if (encoded.startsWith('z.')) {
       const inflated = await inflate(base64UrlToBytes(encoded.slice(2)))
       const json = new TextDecoder().decode(inflated)
-      return unpackRoom(JSON.parse(json))
+      return unpackRoom(JSON.parse(json), fallbackId)
     }
     if (encoded.startsWith('c.')) {
       const bytes = base64UrlToBytes(encoded.slice(2))
       const json = new TextDecoder().decode(bytes)
-      return unpackRoom(JSON.parse(json))
+      return unpackRoom(JSON.parse(json), fallbackId)
     }
     // 레거시: 풀 JSON base64url
     const bytes = base64UrlToBytes(encoded)
     const json = new TextDecoder().decode(bytes)
-    return unpackRoom(JSON.parse(json))
+    return unpackRoom(JSON.parse(json), fallbackId)
   } catch {
     return null
   }
 }
 
-export function decodeRoomSync(encoded: string): ShareRoom | null {
+export function decodeRoomSync(
+  encoded: string,
+  fallbackId?: string,
+): ShareRoom | null {
   try {
     if (encoded.startsWith('z.')) {
       // 동기 경로에서는 압축본을 못 풂 → null (async 사용)
@@ -281,11 +301,11 @@ export function decodeRoomSync(encoded: string): ShareRoom | null {
     if (encoded.startsWith('c.')) {
       const bytes = base64UrlToBytes(encoded.slice(2))
       const json = new TextDecoder().decode(bytes)
-      return unpackRoom(JSON.parse(json))
+      return unpackRoom(JSON.parse(json), fallbackId)
     }
     const bytes = base64UrlToBytes(encoded)
     const json = new TextDecoder().decode(bytes)
-    return unpackRoom(JSON.parse(json))
+    return unpackRoom(JSON.parse(json), fallbackId)
   } catch {
     return null
   }

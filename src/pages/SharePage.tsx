@@ -7,8 +7,8 @@ import { useCalendar } from '../context/CalendarContext'
 import { useToast } from '../hooks/useToast'
 import {
   createRoom,
-  hostLinkFor,
   inviteLinkFor,
+  localRoomPath,
   makeParticipant,
   updateRoomTitle,
   upsertParticipant,
@@ -58,6 +58,7 @@ export function SharePage() {
   const [rooms, setRooms] = useState<MyRoomRef[]>([])
   const [copied, setCopied] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [shareUrl, setShareUrl] = useState('')
 
   const refreshRooms = () => setRooms(loadMyRooms())
 
@@ -65,10 +66,19 @@ export function SharePage() {
     refreshRooms()
   }, [])
 
-  const shareUrl = useMemo(
-    () => (activeRoom ? inviteLinkFor(activeRoom) : ''),
-    [activeRoom],
-  )
+  useEffect(() => {
+    if (!activeRoom) {
+      setShareUrl('')
+      return
+    }
+    let cancelled = false
+    void inviteLinkFor(activeRoom).then((url) => {
+      if (!cancelled) setShareUrl(url)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [activeRoom])
 
   const summary =
     mode === 'dates'
@@ -164,7 +174,7 @@ export function SharePage() {
           일정 공유
         </h2>
         <p className="text-xs text-[var(--muted)]">
-          방을 만들면 내 캘린더 일정이 자동으로 반영되고, 링크를 공유할 수
+          링크를 보내면 친구가 가능 시간을 등록하고, 겹치는 시간을 함께 볼 수
           있어요.
         </p>
       </div>
@@ -313,7 +323,7 @@ export function SharePage() {
                   친구에게 보내기
                 </button>
                 <Link
-                  to={`/join/${activeRoom.id}?d=${new URL(hostLinkFor(activeRoom)).searchParams.get('d') ?? ''}`}
+                  to={localRoomPath(activeRoom.id)}
                   className="flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700"
                 >
                   내 방 열기
@@ -331,12 +341,19 @@ export function SharePage() {
                 className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-5"
                 onClick={(e) => e.stopPropagation()}
               >
-                <p className="text-sm font-bold text-slate-900">공유 링크</p>
+                <p className="text-sm font-bold text-slate-900">초대 링크</p>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                  타임픽처럼 이 링크를 연 사람은 항상 새 이름으로 참여합니다.
+                  내 가능 시간이 담긴 링크입니다. 친구가 열면 겹치는 시간을
+                  바로 보고, 새 이름으로 등록할 수 있어요. (비밀번호는 넣지
+                  않습니다)
                 </p>
                 <p className="mt-3 break-all rounded-xl bg-slate-50 px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-slate-200">
-                  {shareUrl}
+                  {shareUrl || '링크 만드는 중…'}
+                </p>
+                <p className="mt-2 text-[10px] text-slate-400">
+                  {shareUrl
+                    ? `길이 ${shareUrl.length}자 · 친구가 등록한 뒤 「호스트에게 전달」을 보내면 내 화면에도 겹침이 반영됩니다`
+                    : '압축 중…'}
                 </p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <button
@@ -385,9 +402,7 @@ export function SharePage() {
               {rooms.map((ref) => {
                 const room = loadRoom(ref.id)
                 const count = room?.participants.length ?? 0
-                const href = room
-                  ? `/join/${ref.id}?d=${new URL(hostLinkFor(room)).searchParams.get('d') ?? ''}`
-                  : `/join/${ref.id}`
+                const href = localRoomPath(ref.id)
 
                 return (
                   <li

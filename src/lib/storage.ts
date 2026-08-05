@@ -3,6 +3,7 @@ import { createId, normalizeRoom } from '../types'
 import {
   decodeRoomAsync,
   decodeRoomSync,
+  encodeRoomAsync,
   encodeRoomSync,
 } from './shareCodec'
 
@@ -123,23 +124,31 @@ export function encodeRoomData(
   })
 }
 
-export function decodeRoomData(encoded: string): ShareRoom | null {
-  return decodeRoomSync(encoded)
+export function decodeRoomData(
+  encoded: string,
+  fallbackId?: string,
+): ShareRoom | null {
+  return decodeRoomSync(encoded, fallbackId)
 }
 
 export async function decodeRoomDataAsync(
   encoded: string,
+  fallbackId?: string,
 ): Promise<ShareRoom | null> {
-  return decodeRoomAsync(encoded)
+  return decodeRoomAsync(encoded, fallbackId)
 }
 
 export type ShareLinkOptions = {
-  /** true면 참가자 일정까지 포함 (길어질 수 있음) */
+  /**
+   * true면 참가자 가능시간 포함 (동기화용).
+   * 초대 링크는 false(When2Meet식 짧은 링크)가 기본.
+   */
   includeParticipants?: boolean
   /** true면 타임픽식 새 참가 링크 (기존 로그인 무시) */
   guest?: boolean
 }
 
+/** 동기 공유 링크 (압축 없음). 호스트 재진입 등 */
 export function buildShareUrl(
   room: ShareRoom,
   opts?: ShareLinkOptions,
@@ -152,5 +161,29 @@ export function buildShareUrl(
     }),
   )
   if (opts?.guest) url.searchParams.set('guest', '1')
+  return url.toString()
+}
+
+/**
+ * 친구 초대: 현재 참가자 가능시간 포함(압축, 비밀번호 제외).
+ * 친구가 열면 호스트와 겹치는 시간을 바로 볼 수 있음.
+ */
+export async function buildInviteUrl(room: ShareRoom): Promise<string> {
+  const url = new URL(`${window.location.origin}/join/${room.id}`)
+  const encoded = await encodeRoomAsync(room, { includeParticipants: true })
+  url.searchParams.set('d', encoded)
+  url.searchParams.set('guest', '1')
+  return url.toString()
+}
+
+/**
+ * 친구 → 호스트 동기화용.
+ * 참가자 가능시간만 압축해 넣고, 비밀번호는 넣지 않음.
+ */
+export async function buildSyncUrl(room: ShareRoom): Promise<string> {
+  const url = new URL(`${window.location.origin}/join/${room.id}`)
+  const encoded = await encodeRoomAsync(room, { includeParticipants: true })
+  url.searchParams.set('d', encoded)
+  url.searchParams.set('sync', '1')
   return url.toString()
 }

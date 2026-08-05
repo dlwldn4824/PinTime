@@ -1,8 +1,12 @@
 import {
+  buildInviteUrl,
   buildShareUrl,
+  buildSyncUrl,
   decodeRoomData,
   decodeRoomDataAsync,
+  loadMyRooms,
   loadRoom,
+  loadUserId,
   saveRoom,
   trackMyRoom,
   type ShareLinkOptions,
@@ -84,10 +88,13 @@ export function upsertParticipant(
 
   const next = normalizeRoom({ ...room, participants })
   saveRoom(next)
+  // createRoom만 host로 기록. 초대 링크 첫 등록자가 host로 승격되면 안 됨
+  const prevRole = loadMyRooms().find((r) => r.id === next.id)?.role
+  const role = prevRole === 'host' ? 'host' : 'guest'
   trackMyRoom({
     id: next.id,
     title: next.title,
-    role: room.participants.length === 0 ? 'host' : 'guest',
+    role,
     updatedAt: Date.now(),
   })
   return { ok: true, room: next, participant: nextParticipant }
@@ -125,19 +132,29 @@ function applyResolved(
   fromUrl: ShareRoom,
 ): ShareRoom {
   const existing = loadRoom(roomId)
-  if (
-    existing &&
-    existing.participants.length > fromUrl.participants.length
-  ) {
-    return existing
+  if (!existing) {
+    saveRoom(fromUrl)
+    return fromUrl
   }
-  if (existing && existing.participants.length > 0) {
-    const merged = mergeParticipants(fromUrl, existing)
-    saveRoom(merged)
-    return merged
+
+  // 방 설정은 URL(초대) 기준으로 맞추고, 참가자는 최신 슬롯 우선으로 합침
+  const merged = mergeParticipantsPreferNewer(
+    {
+      ...fromUrl,
+      // URL에 참가자가 없으면(짧은 초대) 로컬 참가자를 유지
+      participants:
+        fromUrl.participants.length > 0
+          ? fromUrl.participants
+          : existing.participants,
+    },
+    existing,
+  )
+  // URL이 골격만일 때도 로컬 confirmed 유지
+  if (!fromUrl.confirmed && existing.confirmed) {
+    merged.confirmed = existing.confirmed
   }
-  saveRoom(fromUrl)
-  return fromUrl
+  saveRoom(merged)
+  return merged
 }
 
 export function resolveRoom(
@@ -145,7 +162,7 @@ export function resolveRoom(
   encoded?: string | null,
 ): ShareRoom | null {
   if (encoded) {
-    const fromUrl = decodeRoomData(encoded)
+    const fromUrl = decodeRoomData(encoded, roomId)
     if (fromUrl && fromUrl.id === roomId) {
       return applyResolved(roomId, fromUrl)
     }
@@ -159,7 +176,8 @@ export async function resolveRoomAsync(
 ): Promise<ShareRoom | null> {
   if (encoded) {
     const fromUrl =
-      (await decodeRoomDataAsync(encoded)) ?? decodeRoomData(encoded)
+      (await decodeRoomDataAsync(encoded, roomId)) ??
+      decodeRoomData(encoded, roomId)
     if (fromUrl && fromUrl.id === roomId) {
       return applyResolved(roomId, fromUrl)
     }
@@ -167,12 +185,37 @@ export async function resolveRoomAsync(
   return loadRoom(roomId)
 }
 
-function mergeParticipants(primary: ShareRoom, secondary: ShareRoom): ShareRoom {
+/** 같은 이름은 joinedAt·슬롯 수가 더 최신인 쪽을 채택. 비밀번호는 비어 있지 않은 쪽 유지 */
+function mergeParticipantsPreferNewer(
+  primary: ShareRoom,
+  secondary: ShareRoom,
+): ShareRoom {
   const map = new Map<string, Participant>()
-  for (const p of primary.participants) map.set(p.name, p)
-  for (const p of secondary.participants) {
-    if (!map.has(p.name)) map.set(p.name, p)
+
+  const consider = (p: Participant) => {
+    const prev = map.get(p.name)
+    if (!prev) {
+      map.set(p.name, p)
+      return
+    }
+    const prevScore = (prev.joinedAt || 0) + prev.availableSlots.length
+    const nextScore = (p.joinedAt || 0) + p.availableSlots.length
+    const newer =
+      (p.joinedAt || 0) !== (prev.joinedAt || 0)
+        ? (p.joinedAt || 0) > (prev.joinedAt || 0)
+        : nextScore >= prevScore
+    const chosen = newer ? p : prev
+    map.set(p.name, {
+      ...chosen,
+      // URL 동기화본에 비밀번호가 없으면 로컬 비밀번호 유지
+      password: chosen.password || prev.password || p.password || '',
+      id: prev.id || p.id,
+    })
   }
+
+  for (const p of secondary.participants) consider(p)
+  for (const p of primary.participants) consider(p)
+
   return normalizeRoom({
     ...primary,
     participants: [...map.values()],
@@ -187,20 +230,36 @@ export function shareLinkFor(
   return buildShareUrl(room, opts)
 }
 
-/** 친구 초대용: 참가자 일정 포함 + guest=1 (새 이름으로 참여) */
-export function inviteLinkFor(room: ShareRoom): string {
+/**
+ * 친구 초대: 가능시간 포함(압축) + guest=1.
+ * 비밀번호는 넣지 않음. 친구가 겹치는 시간을 볼 수 있게 함.
+ */
+export async function inviteLinkFor(room: ShareRoom): Promise<string> {
+  return buildInviteUrl(room)
+}
+
+/** 호스트가 자기 방으로 다시 들어갈 때 (짧은 링크, 세션 유지) */
+export function hostLinkFor(room: ShareRoom): string {
   return buildShareUrl(room, {
-    includeParticipants: room.participants.length > 0,
-    guest: true,
+    includeParticipants: false,
+    guest: false,
   })
 }
 
-/** 호스트가 자기 방으로 다시 들어갈 때 (세션 유지) */
-export function hostLinkFor(room: ShareRoom): string {
-  return buildShareUrl(room, {
-    includeParticipants: room.participants.length > 0,
-    guest: false,
-  })
+/** 친구 등록 후 호스트에게 가능시간을 넘길 때 (압축, 비밀번호 제외) */
+export async function syncLinkFor(room: ShareRoom): Promise<string> {
+  return buildSyncUrl(room)
+}
+
+/** 로컬에 방이 있으면 id만으로도 열 수 있는 짧은 경로 */
+export function localRoomPath(roomId: string): string {
+  return `/join/${roomId}`
+}
+
+export function isLikelyHost(room: ShareRoom): boolean {
+  if (room.participants.length === 0) return true
+  const uid = loadUserId()
+  return room.participants.some((p) => p.password === uid)
 }
 
 export function slotAvailability(room: ShareRoom): Map<

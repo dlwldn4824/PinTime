@@ -4,11 +4,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
   type SetStateAction,
 } from 'react'
+import {
+  confirmOverwriteManualRooms,
+  syncMyAvailabilityAcrossRooms,
+} from '../lib/calendarRoomSync'
 import { loadCalendar, saveCalendar } from '../lib/storage'
 import {
   type AllDayEvent,
@@ -65,6 +70,21 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     saveCalendar({ schedules, allDay })
+  }, [schedules, allDay])
+
+  // 캘린더 ↔ 공유 링크 가능시간 동기화 (앱 반영 방은 자동, 수동 수정 방은 확인)
+  const lastCalendarSyncKey = useRef<string | null>(null)
+  useEffect(() => {
+    const key = JSON.stringify({ schedules, allDay })
+    if (lastCalendarSyncKey.current === null) {
+      lastCalendarSyncKey.current = key
+      return
+    }
+    if (lastCalendarSyncKey.current === key) return
+    lastCalendarSyncKey.current = key
+    syncMyAvailabilityAcrossRooms(schedules, allDay, {
+      confirmManual: confirmOverwriteManualRooms,
+    })
   }, [schedules, allDay])
 
   const setSelectedDate = useCallback((dateKey: string) => {

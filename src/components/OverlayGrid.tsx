@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { type ShareRoom, type SlotKey } from '../types'
 import { slotAvailability } from '../lib/room'
 import {
@@ -39,6 +39,7 @@ export function OverlayGrid({
     y: number
   } | null>(null)
   const [filter, setFilter] = useState<FilterMode>('all')
+  const filterTouched = useRef(false)
 
   const dragging = useRef(false)
   const dragCol = useRef<string | null>(null)
@@ -65,6 +66,14 @@ export function OverlayGrid({
     }
     return n
   }, [map, participantCount])
+
+  // 2명 이상이고 모두 가능한 칸이 있으면 기본으로「모두 가능」필터
+  useEffect(() => {
+    if (filterTouched.current) return
+    if (participantCount >= 2 && everyoneCount > 0) {
+      setFilter('everyone')
+    }
+  }, [participantCount, everyoneCount])
   const mostCount = useMemo(() => {
     if (maxCount === 0) return 0
     let n = 0
@@ -199,7 +208,10 @@ export function OverlayGrid({
                 key={opt.id}
                 type="button"
                 disabled={disabled}
-                onClick={() => setFilter(opt.id)}
+                onClick={() => {
+                  filterTouched.current = true
+                  setFilter(opt.id)
+                }}
                 className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${
                   active
                     ? opt.id === 'everyone'
