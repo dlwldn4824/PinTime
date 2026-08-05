@@ -12,7 +12,7 @@
 |---|---|
 | 앱 | [Netlify](https://zesty-clafoutis-473edf.netlify.app) · [Vercel](https://pintime.vercel.app) |
 | 사업 소개서 (피치) | [Netlify `/pitch.html`](https://zesty-clafoutis-473edf.netlify.app/pitch.html) · [Vercel](https://pintime.vercel.app/pitch.html) |
-| 코드 | [github.com/dlwldn4824/pintime](https://github.com/dlwldn4824/pintime) |
+| 코드 | [github.com/dlwldn4824/PinTime](https://github.com/dlwldn4824/PinTime) |
 
 ```bash
 npm install
