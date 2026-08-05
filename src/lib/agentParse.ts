@@ -140,6 +140,36 @@ function thisWeekRange(from = new Date()): { start: string; end: string } {
   return { start: today > toDateKey(mon) ? today : toDateKey(mon), end: fri }
 }
 
+/** 의도 period → 조회/제안용 날짜 범위 */
+export function resolvePeriodRange(
+  period: ParsedIntent['period'],
+  now = new Date(),
+): { start: string; end: string } {
+  if (period === 'this_week') return thisWeekRange(now)
+  return nextWeekRange(now)
+}
+
+export type BusyWindow = {
+  date: string
+  start: string
+  end: string
+  title: string
+}
+
+function timeToMin(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return (h || 0) * 60 + (m || 0)
+}
+
+function rangesOverlap(
+  aStart: string,
+  aEnd: string,
+  bStart: string,
+  bEnd: string,
+): boolean {
+  return timeToMin(aStart) < timeToMin(bEnd) && timeToMin(bStart) < timeToMin(aEnd)
+}
+
 function extractDays(text: string): Day[] {
   const found: Day[] = []
   for (const { day, patterns } of DAY_ALIASES) {
@@ -424,10 +454,11 @@ export function proposeAppointment(
   intent: ParsedIntent,
   chat: string,
   now = new Date(),
+  opts?: { busy?: BusyWindow[] },
 ): AgentProposal {
   const { people, shared } = extractConstraints(intent, chat)
-  const range =
-    intent.period === 'this_week' ? thisWeekRange(now) : nextWeekRange(now)
+  const range = resolvePeriodRange(intent.period, now)
+  const busy = opts?.busy ?? []
 
   const excludeDays = uniq(people.flatMap((p) => p.excludeDays))
   const preferDays = uniq(people.flatMap((p) => p.preferDays))
@@ -471,12 +502,20 @@ export function proposeAppointment(
         if (venue.area === '건대입구' && avoidAreas.includes('강남')) score += 10
 
         const endHour = startHour + 2
+        const start = hourLabel(startHour)
+        const end = hourLabel(endHour)
+        const hitBusy = busy.some(
+          (b) =>
+            b.date === cur && rangesOverlap(start, end, b.start, b.end),
+        )
+        if (hitBusy) score -= 120
+
         candidates.push({
-          id: `${cur}@${hourLabel(startHour)}`,
+          id: `${cur}@${start}`,
           date: cur,
           day,
-          start: hourLabel(startHour),
-          end: hourLabel(endHour),
+          start,
+          end,
           startHour,
           venue,
           reason: '',

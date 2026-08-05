@@ -29,7 +29,7 @@ type CalendarContextValue = {
   allDay: AllDayEvent[]
   setSchedules: Dispatch<SetStateAction<Schedule[]>>
   setAllDay: Dispatch<SetStateAction<AllDayEvent[]>>
-  addSchedule: (s: Omit<Schedule, 'id'>) => void
+  addSchedule: (s: Omit<Schedule, 'id'>) => string
   updateSchedule: (id: string, s: Omit<Schedule, 'id'>) => void
   removeSchedule: (id: string) => void
   addAllDay: (e: Omit<AllDayEvent, 'id'>) => void
@@ -103,7 +103,9 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const addSchedule = useCallback((s: Omit<Schedule, 'id'>) => {
-    setSchedules((prev) => [...prev, { ...s, id: createId() }])
+    const id = createId()
+    setSchedules((prev) => [...prev, { ...s, id }])
+    return id
   }, [])
 
   const updateSchedule = useCallback((id: string, s: Omit<Schedule, 'id'>) => {
