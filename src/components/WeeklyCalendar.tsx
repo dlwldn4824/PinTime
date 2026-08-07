@@ -18,13 +18,15 @@ import {
   toDateKey,
 } from '../types'
 
-const ROW_H = 56
-const ALLDAY_BAR_H = 22
-const ALLDAY_GAP = 3
+const ROW_H = 52
+const ALLDAY_BAR_H = 20
+const ALLDAY_GAP = 2
+/** 첫 열 고정 + 요일 7열 동일 분배 */
 const COL =
-  'grid-cols-[56px_repeat(7,minmax(0,1fr))] sm:grid-cols-[64px_repeat(7,minmax(0,1fr))]'
+  'grid-cols-[2.75rem_repeat(7,minmax(0,1fr))] sm:grid-cols-[3.25rem_repeat(7,minmax(0,1fr))]'
+const GRID_LINE = 'border-[var(--line)]'
 
-type WeekCol = { date: string; day: Day; label: string }
+type WeekCol = { date: string; day: Day; label: string; dayNum: number }
 
 type WeeklyCalendarProps = {
   schedules: Schedule[]
@@ -36,6 +38,8 @@ type WeeklyCalendarProps = {
   onCreateRange: (day: Day, startHour: number, endHour: number) => void
   onSelectSchedule: (schedule: Schedule) => void
   onSelectAllDay: (event: AllDayEvent) => void
+  /** 요일 헤더 클릭 → 그날 일정 보기 */
+  onDayClick?: (dateKey: string) => void
 }
 
 function weekRangeLabel(monday: string, sunday: string): string {
@@ -80,6 +84,7 @@ function weekColumns(anchor: string): WeekCol[] {
       date,
       day,
       label: `${cur.getDate()}일 (${day})`,
+      dayNum: cur.getDate(),
     }
   })
 }
@@ -148,6 +153,7 @@ export function WeeklyCalendar({
   onCreateRange,
   onSelectSchedule,
   onSelectAllDay,
+  onDayClick,
 }: WeeklyCalendarProps) {
   const [drag, setDrag] = useState<DragState | null>(null)
   const dragging = useRef(false)
@@ -274,104 +280,131 @@ export function WeeklyCalendar({
         </button>
       </div>
 
-      {/* 요일 헤더 */}
-      <div
-        className={`grid shrink-0 border-b border-[var(--line)] ${COL}`}
-      >
-        <div />
-        {cols.map((col) => {
-          const isToday = col.date === todayKey
-          return (
-            <div key={col.date} className="px-1 py-2.5 text-center sm:px-2">
-              <span
-                className={`inline-flex items-center justify-center rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide ${
-                  isToday
-                    ? 'bg-blue-500 text-white'
-                    : 'text-[var(--muted)]'
+      {/* 요일 · 종일 · 시간 — TimeTree식 단일 스크롤 그리드 */}
+      <div className="pt-scroll min-h-0 flex-1 overflow-auto">
+        {/* 요일 헤더: 위 요일 / 아래 날짜 숫자 */}
+        <div
+          className={`sticky top-0 z-20 grid border-b ${GRID_LINE} bg-white ${COL}`}
+        >
+          <div className="min-w-0" />
+          {cols.map((col) => {
+            const isToday = col.date === todayKey
+            const isSun = col.day === '일'
+            const isSat = col.day === '토'
+            return (
+              <button
+                key={col.date}
+                type="button"
+                onClick={() => onDayClick?.(col.date)}
+                className={`flex min-w-0 flex-col items-center gap-0.5 py-2 transition hover:bg-slate-50 ${
+                  isToday ? 'bg-[var(--tomato-soft)]/35' : ''
                 }`}
               >
-                {col.label}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* 하루 종일 레이어 */}
-      <div
-        className={`grid shrink-0 border-b border-[var(--line)] bg-slate-50/40 ${COL}`}
-        style={{ minHeight: allDayHeight }}
-      >
-        <div className="flex items-start justify-end border-r border-[var(--line)] pr-2 pt-2">
-          <span className="text-[10px] font-semibold whitespace-nowrap text-[var(--muted)] sm:text-[11px]">
-            하루 종일
-          </span>
-        </div>
-        <div
-          className="relative col-span-7"
-          style={{ minHeight: allDayHeight }}
-        >
-          {/* 세로 구분선 */}
-          <div className="pointer-events-none absolute inset-0 grid grid-cols-7">
-            {cols.map((col) => (
-              <div
-                key={`line-${col.date}`}
-                className="border-r border-[var(--line)] last:border-r-0"
-              />
-            ))}
-          </div>
-
-          {segments.map((seg) => {
-            const tone = toneOf(seg.color)
-            const left = (seg.startCol / 7) * 100
-            const width = ((seg.endCol - seg.startCol + 1) / 7) * 100
-            const radius = [
-              seg.isStart ? '6px' : '0',
-              seg.isEnd ? '6px' : '0',
-              seg.isEnd ? '6px' : '0',
-              seg.isStart ? '6px' : '0',
-            ].join(' ')
-
-            return (
-              <div
-                key={`${seg.id}-${seg.startCol}`}
-                className="absolute px-0.5"
-                style={{
-                  left: `${left}%`,
-                  width: `${width}%`,
-                  top: 6 + seg.lane * (ALLDAY_BAR_H + ALLDAY_GAP),
-                  height: ALLDAY_BAR_H,
-                }}
-              >
-                <button
-                  type="button"
-                  title="클릭하여 수정"
-                  onClick={() => {
-                    const ev = eventById.get(seg.id)
-                    if (ev) onSelectAllDay(ev)
-                  }}
-                  className="flex h-full w-full items-center truncate px-2 text-left text-[11px] font-semibold text-white transition hover:brightness-110"
-                  style={{
-                    background: tone.solid,
-                    borderRadius: radius,
-                  }}
+                <span
+                  className={`text-[10px] font-medium ${
+                    isSun
+                      ? 'text-rose-400'
+                      : isSat
+                        ? 'text-sky-500'
+                        : 'text-slate-400'
+                  }`}
                 >
-                  {seg.isStart ? seg.title : '\u00a0'}
-                </button>
-              </div>
+                  {col.day}
+                </span>
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-semibold tabular-nums ${
+                    isToday
+                      ? 'bg-[var(--tomato)] text-white'
+                      : isSun
+                        ? 'text-rose-500'
+                        : isSat
+                          ? 'text-sky-600'
+                          : 'text-slate-800'
+                  }`}
+                >
+                  {col.dayNum}
+                </span>
+              </button>
             )
           })}
-
-          {segments.length === 0 && (
-            <p className="pointer-events-none absolute inset-0 flex items-center px-3 text-[10px] text-slate-300">
-              종일 일정이 없어요
-            </p>
-          )}
         </div>
-      </div>
 
-      {/* 시간 그리드 */}
-      <div className="pt-scroll min-h-0 flex-1 overflow-auto">
+        {/* 종일 */}
+        <div
+          className={`sticky z-20 border-b ${GRID_LINE} bg-white`}
+          style={{
+            top: '3.35rem',
+            minHeight: allDayHeight,
+          }}
+        >
+          <div className={`relative grid ${COL}`} style={{ minHeight: allDayHeight }}>
+            <div
+              className={`flex min-w-0 items-center justify-end border-r ${GRID_LINE} pr-1.5`}
+            >
+              <span className="text-[10px] font-medium text-slate-400">
+                종일
+              </span>
+            </div>
+            {cols.map((col) => (
+              <div
+                key={`allday-cell-${col.date}`}
+                className={`min-w-0 border-r ${GRID_LINE} last:border-r-0 ${
+                  col.date === todayKey ? 'bg-[var(--tomato-soft)]/20' : ''
+                }`}
+              />
+            ))}
+
+            <div className={`pointer-events-none absolute inset-0 grid ${COL}`}>
+              <div className="min-w-0" />
+              <div
+                className="relative col-span-7 min-w-0"
+                style={{ minHeight: allDayHeight }}
+              >
+                {segments.map((seg) => {
+                  const tone = toneOf(seg.color)
+                  const left = (seg.startCol / 7) * 100
+                  const width = ((seg.endCol - seg.startCol + 1) / 7) * 100
+                  const radius = [
+                    seg.isStart ? '4px' : '0',
+                    seg.isEnd ? '4px' : '0',
+                    seg.isEnd ? '4px' : '0',
+                    seg.isStart ? '4px' : '0',
+                  ].join(' ')
+
+                  return (
+                    <div
+                      key={`${seg.id}-${seg.startCol}`}
+                      className="absolute px-px"
+                      style={{
+                        left: `${left}%`,
+                        width: `${width}%`,
+                        top: 4 + seg.lane * (ALLDAY_BAR_H + ALLDAY_GAP),
+                        height: ALLDAY_BAR_H,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const ev = eventById.get(seg.id)
+                          if (ev) onSelectAllDay(ev)
+                        }}
+                        className="pointer-events-auto flex h-full w-full items-center truncate px-1.5 text-left text-[11px] font-semibold text-white"
+                        style={{
+                          background: tone.solid,
+                          borderRadius: radius,
+                        }}
+                      >
+                        {seg.isStart ? seg.title : '\u00a0'}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 시간 그리드 */}
         <div
           className={`relative grid ${COL}`}
           style={{ height: HOURS.length * ROW_H }}
@@ -379,10 +412,10 @@ export function WeeklyCalendar({
           {HOURS.map((hour) => (
             <div key={`row-${hour}`} className="contents">
               <div
-                className="relative border-r border-[var(--line)] pr-2 text-right sm:pr-3"
+                className={`relative min-w-0 border-r ${GRID_LINE} pr-1 text-right sm:pr-1.5`}
                 style={{ height: ROW_H }}
               >
-                <span className="absolute top-[-0.55rem] right-2 text-[10px] font-medium text-[var(--muted)] sm:right-3 sm:text-[11px]">
+                <span className="absolute top-[-0.45rem] right-1 text-[10px] font-medium tabular-nums text-slate-400 sm:right-1.5">
                   {hourToLabel(hour)}
                 </span>
               </div>
@@ -393,16 +426,19 @@ export function WeeklyCalendar({
                   drag.day === col.day &&
                   hour >= Math.min(drag.startHour, drag.endHour) &&
                   hour <= Math.max(drag.startHour, drag.endHour)
+                const isTodayCol = col.date === todayKey
 
                 return (
                   <div
                     key={`${col.date}-${hour}`}
-                    className={`relative border-b border-r border-[var(--line)] last:border-r-0 ${
+                    className={`relative min-w-0 border-b border-r ${GRID_LINE} last:border-r-0 ${
                       masked
                         ? 'cursor-not-allowed bg-slate-100'
                         : inDrag
-                          ? 'cursor-ns-resize bg-sky-50'
-                          : 'cursor-ns-resize bg-white hover:bg-slate-50/70'
+                          ? 'cursor-ns-resize bg-[var(--tomato-soft)]'
+                          : isTodayCol
+                            ? 'cursor-ns-resize bg-[var(--tomato-soft)]/15 hover:bg-[var(--tomato-soft)]/35'
+                            : 'cursor-ns-resize bg-white hover:bg-slate-50'
                     }`}
                     style={{ height: ROW_H }}
                     onMouseDown={(e) => {
@@ -427,54 +463,56 @@ export function WeeklyCalendar({
                         prev ? { ...prev, endHour: hour } : prev,
                       )
                     }}
-                  />
+                  >
+                    {/* 30분 보조선 */}
+                    {!masked && (
+                      <div className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed border-slate-100" />
+                    )}
+                  </div>
                 )
               })}
             </div>
           ))}
 
-          <div
-            className={`pointer-events-none absolute inset-0 grid ${COL}`}
-          >
-            <div />
+          <div className={`pointer-events-none absolute inset-0 grid ${COL}`}>
+            <div className="min-w-0" />
             {cols.map((col) => {
               const daySchedules = timedForDay(col.date)
               const { laneOf, overlaps } = overlapLayout(daySchedules)
 
               return (
-                <div key={`events-${col.date}`} className="relative">
+                <div key={`events-${col.date}`} className="relative min-w-0">
                   {daySchedules.map((schedule) => {
                     const start = parseHour(schedule.start)
                     const end = parseHour(schedule.end)
-                    const top = (start - HOURS[0]) * ROW_H + 3
-                    const height = (end - start) * ROW_H - 6
+                    const top = (start - HOURS[0]) * ROW_H + 1
+                    const height = (end - start) * ROW_H - 2
                     const tone = toneOf(schedule.color)
                     const lane = laneOf.get(schedule.occurrenceId) ?? 0
                     const isOverlap =
                       overlaps.get(schedule.occurrenceId) ?? false
-                    const inset = isOverlap ? Math.min(lane, 3) * 10 : 0
+                    const inset = isOverlap ? Math.min(lane, 3) * 8 : 0
 
                     return (
                       <button
                         key={schedule.occurrenceId}
                         type="button"
-                        title="클릭하여 수정"
                         onClick={() => onSelectSchedule(schedule)}
-                        className="pointer-events-auto absolute overflow-hidden rounded-lg px-2 py-1.5 text-left backdrop-blur-[1px] transition hover:brightness-[0.98] sm:px-2.5"
+                        className="pointer-events-auto absolute overflow-hidden rounded px-1.5 py-1 text-left transition hover:brightness-[0.97]"
                         style={{
                           top,
-                          height: Math.max(height, 32),
-                          left: 4 + inset,
-                          right: 4,
+                          height: Math.max(height, 28),
+                          left: 1 + inset,
+                          right: 1,
                           zIndex: 10 + lane,
                           background: isOverlap
-                            ? solidAlpha(tone.solid, 0.38)
-                            : solidAlpha(tone.solid, 0.18),
+                            ? solidAlpha(tone.solid, 0.42)
+                            : solidAlpha(tone.solid, 0.22),
                           boxShadow: `inset 3px 0 0 ${tone.solid}`,
                           color: tone.text,
                         }}
                       >
-                        <p className="truncate text-[11px] font-bold">
+                        <p className="truncate text-[10px] font-bold leading-tight">
                           {schedule.start}
                           {schedule.repeat &&
                           schedule.repeat !== '안 함' &&
@@ -482,7 +520,7 @@ export function WeeklyCalendar({
                             ? ' · ↻'
                             : ''}
                         </p>
-                        <p className="truncate text-xs font-semibold">
+                        <p className="truncate text-[11px] font-semibold leading-snug">
                           {schedule.title}
                         </p>
                       </button>

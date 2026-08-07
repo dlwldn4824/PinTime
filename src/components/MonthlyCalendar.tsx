@@ -233,7 +233,7 @@ export function MonthlyCalendar({
   const label = `${year}년 ${month + 1}월`
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white select-none">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white select-none">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <button
           type="button"
@@ -258,11 +258,11 @@ export function MonthlyCalendar({
         </button>
       </div>
 
-      <div className="grid grid-cols-7 border-b border-slate-100">
+      <div className="grid grid-cols-[repeat(7,minmax(0,1fr))] border-b border-slate-100">
         {WEEKDAYS.map((d, i) => (
           <div
             key={d}
-            className={`py-2 text-center text-[11px] font-semibold ${
+            className={`min-w-0 py-2 text-center text-[11px] font-semibold ${
               i === 0 ? 'text-rose-400' : 'text-slate-400'
             }`}
           >
@@ -271,7 +271,7 @@ export function MonthlyCalendar({
         ))}
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {weeks.map((week, wi) => {
           const weekKeys = week.map((c) => c.key)
           const segments = segmentsForWeek(
@@ -297,10 +297,10 @@ export function MonthlyCalendar({
           return (
             <div
               key={wi}
-              className="relative min-h-0 flex-1 border-b border-slate-100 last:border-b-0"
+              className="relative min-h-0 flex-1 overflow-hidden border-b border-slate-100 last:border-b-0"
             >
               {/* hit targets */}
-              <div className="absolute inset-0 z-0 grid grid-cols-7">
+              <div className="absolute inset-0 z-0 grid grid-cols-[repeat(7,minmax(0,1fr))]">
                 {week.map((cell) => {
                   const inSel =
                     !!selection &&
@@ -311,7 +311,7 @@ export function MonthlyCalendar({
                     <div
                       key={cell.key}
                       data-date={cell.key}
-                      className={`border-r border-slate-100 last:border-r-0 ${
+                      className={`min-w-0 border-r border-slate-100 last:border-r-0 ${
                         cell.inMonth ? 'bg-white' : 'bg-slate-50/50'
                       } ${inSel ? 'bg-sky-100/70' : ''} cursor-pointer`}
                       onMouseDown={(e) => {
@@ -341,19 +341,19 @@ export function MonthlyCalendar({
               </div>
 
               {/* date numbers */}
-              <div className="pointer-events-none relative z-10 grid grid-cols-7 px-0.5 pt-1">
+              <div className="pointer-events-none relative z-10 grid grid-cols-[repeat(7,minmax(0,1fr))] px-0.5 pt-1">
                 {week.map((cell) => {
                   const dayNum = Number(cell.key.slice(8))
                   const isSun =
                     weekKeys.indexOf(cell.key) === 0
                   return (
-                    <div key={cell.key} className="flex justify-start px-1">
+                    <div key={cell.key} className="flex min-w-0 justify-start px-0.5 sm:px-1">
                       <span
-                        className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                          cell.key === todayKey
-                            ? 'bg-blue-500 text-white'
-                            : selectedDate === cell.key && cell.inMonth
-                              ? 'bg-slate-900 text-white'
+                        className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums ${
+                          selectedDate === cell.key && cell.inMonth
+                            ? 'bg-[var(--tomato)] text-white'
+                            : cell.key === todayKey
+                              ? 'bg-[var(--main-soft)] text-[var(--pin-text)] ring-1 ring-[var(--main)]'
                               : !cell.inMonth
                                 ? 'text-slate-300'
                                 : isSun
@@ -370,7 +370,7 @@ export function MonthlyCalendar({
 
               {/* continuous bars */}
               <div
-                className="pointer-events-none relative z-10 mx-0.5 mt-0.5"
+                className="pointer-events-none relative z-10 mx-0.5 mt-0.5 overflow-hidden"
                 style={{
                   height: Math.max(laneCount, 1) * (BAR_H + BAR_GAP),
                 }}
@@ -427,14 +427,13 @@ export function MonthlyCalendar({
                       >
                         <button
                           type="button"
-                          title="클릭하여 수정"
                           onMouseDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
                             e.stopPropagation()
                             const event = events.find((ev) => ev.id === seg.id)
                             if (event) onSelectEvent(event)
                           }}
-                          className="pointer-events-auto flex h-full w-full items-center truncate px-1.5 text-left text-[10px] font-semibold text-white transition hover:brightness-110"
+                          className="pointer-events-auto flex h-full w-full min-w-0 items-center truncate px-1 text-left text-[10px] font-semibold text-white transition hover:brightness-110"
                           style={{
                             background: tone.solid,
                             borderRadius: radius,
@@ -448,7 +447,7 @@ export function MonthlyCalendar({
               </div>
 
               {/* timed events + more */}
-              <div className="pointer-events-none relative z-10 grid min-h-0 flex-1 grid-cols-7 px-0.5 pb-1">
+              <div className="pointer-events-none relative z-10 grid min-h-0 flex-1 grid-cols-[repeat(7,minmax(0,1fr))] overflow-hidden px-0.5 pb-1">
                 {week.map((cell, di) => {
                   const daySchedules = cell.inMonth
                     ? schedulesOnDate(schedules, cell.key)
@@ -457,7 +456,7 @@ export function MonthlyCalendar({
                   return (
                     <div
                       key={cell.key}
-                      className="min-h-0 space-y-0.5 overflow-hidden px-0.5"
+                      className="min-h-0 min-w-0 space-y-0.5 overflow-hidden px-px"
                     >
                       {daySchedules.slice(0, 2).map((schedule) => {
                         const tone = toneOf(schedule.color)
@@ -465,28 +464,30 @@ export function MonthlyCalendar({
                           <button
                             key={`${schedule.id}-${cell.key}`}
                             type="button"
-                            title="클릭하여 수정"
                             onMouseDown={(e) => e.stopPropagation()}
                             onClick={(e) => {
                               e.stopPropagation()
                               onSelectSchedule?.(schedule)
                             }}
-                            className="pointer-events-auto flex w-full items-center gap-1 truncate text-left text-[10px] font-semibold"
+                            className="pointer-events-auto flex w-full min-w-0 max-w-full items-center gap-0.5 overflow-hidden text-left text-[9px] font-semibold leading-tight sm:gap-1 sm:text-[10px]"
                             style={{ color: tone.text }}
                           >
                             <span
                               className="h-1.5 w-1.5 shrink-0 rounded-full"
                               style={{ background: tone.solid }}
                             />
-                            <span className="truncate">
-                              {schedule.start} {schedule.title}
+                            <span className="min-w-0 flex-1 truncate">
+                              <span className="hidden sm:inline">
+                                {schedule.start}{' '}
+                              </span>
+                              {schedule.title}
                             </span>
                           </button>
                         )
                       })}
                       {(more > 0 || daySchedules.length > 2) && (
-                        <p className="px-0.5 text-[10px] font-medium text-slate-400">
-                          +{more + Math.max(0, daySchedules.length - 2)} more
+                        <p className="truncate px-0.5 text-[9px] font-medium text-slate-400 sm:text-[10px]">
+                          +{more + Math.max(0, daySchedules.length - 2)}
                         </p>
                       )}
                     </div>

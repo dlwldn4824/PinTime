@@ -202,9 +202,9 @@ export function AgentPage() {
                 key={key}
                 className={`flex flex-1 items-center justify-center rounded-full px-2 py-1 text-[11px] font-semibold ${
                   on
-                    ? 'bg-[var(--pin)] text-white'
+                    ? 'bg-[var(--tomato)] text-white'
                     : done
-                      ? 'bg-sky-50 text-[var(--pin-text)]'
+                      ? 'bg-[var(--main-soft)] text-[var(--pin-text)]'
                       : 'bg-slate-100 text-slate-400'
                 }`}
               >
@@ -229,7 +229,7 @@ export function AgentPage() {
                 value={request}
                 onChange={(e) => setRequest(e.target.value)}
                 rows={3}
-                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
                 placeholder="예: 다음 주에 민수, 영희랑 고기 먹게 잡아줘."
               />
               {intentPreview && request.trim() && (
@@ -244,7 +244,7 @@ export function AgentPage() {
                   {intentPreview.participants.map((p) => (
                     <li
                       key={p}
-                      className="rounded-full bg-sky-50 px-2.5 py-1 text-[11px] font-semibold text-sky-800"
+                      className="rounded-full bg-[var(--main-soft)] px-2.5 py-1 text-[11px] font-semibold text-[var(--pin-text)]"
                     >
                       {p}
                     </li>
@@ -260,7 +260,7 @@ export function AgentPage() {
                 type="button"
                 disabled={!request.trim()}
                 onClick={() => setStep('chat')}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--pin)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:opacity-40"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--tomato)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--tomato-deep)] active:bg-[var(--tomato-deep)] disabled:opacity-40"
               >
                 다음 · 대화 수집
                 <ArrowRight size={16} />
@@ -285,7 +285,7 @@ export function AgentPage() {
                 value={chat}
                 onChange={(e) => setChat(e.target.value)}
                 rows={8}
-                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-mono text-[13px] leading-relaxed text-slate-900 outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-mono text-[13px] leading-relaxed text-slate-900 outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
                 placeholder={DEMO_CHAT}
               />
 
@@ -334,7 +334,7 @@ export function AgentPage() {
                   type="button"
                   disabled={analyzing || (!chat.trim() && !captureName)}
                   onClick={runAnalyze}
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--pin)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:opacity-40"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--tomato)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--tomato-deep)] active:bg-[var(--tomato-deep)] disabled:opacity-40"
                 >
                   {analyzing ? '도구 실행 중…' : '도구로 후보 만들기'}
                   {!analyzing && <Sparkles size={16} />}
@@ -390,15 +390,15 @@ export function AgentPage() {
                           </ul>
                         </div>
                       ))}
-                      <div className="rounded-xl border border-sky-100 bg-sky-50/80 px-3.5 py-2.5">
-                        <p className="text-xs font-bold text-sky-900">
+                      <div className="rounded-xl border border-[var(--main)] bg-[var(--main-soft)]/80 px-3.5 py-2.5">
+                        <p className="text-xs font-bold text-[var(--pin-text)]">
                           공통 조건
                         </p>
                         <ul className="mt-1 flex flex-wrap gap-1.5">
                           {proposal.shared.bullets.map((b) => (
                             <li
                               key={b}
-                              className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-sky-800 ring-1 ring-sky-100"
+                              className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[var(--pin-text)] ring-1 ring-[var(--main)]"
                             >
                               {b}
                             </li>
@@ -460,7 +460,7 @@ export function AgentPage() {
                                     onClick={() => setSelected(c)}
                                     className={`w-full rounded-xl px-3.5 py-2.5 text-left text-xs transition ${
                                       on
-                                        ? 'bg-sky-50 ring-2 ring-[var(--pin)]'
+                                        ? 'bg-[var(--tomato-soft)] ring-2 ring-[var(--tomato)]'
                                         : 'bg-slate-50 hover:bg-slate-100'
                                     }`}
                                   >
@@ -481,7 +481,7 @@ export function AgentPage() {
                       <button
                         type="button"
                         onClick={confirm}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--pin)] px-4 py-3.5 text-sm font-bold text-white transition hover:bg-blue-600"
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--tomato)] px-4 py-3.5 text-sm font-bold text-white transition hover:bg-[var(--tomato-deep)] active:bg-[var(--tomato-deep)]"
                       >
                         승인 · calendar.create
                         <Check size={17} strokeWidth={2.5} />

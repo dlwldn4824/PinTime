@@ -1,19 +1,66 @@
 @import 'tailwindcss';
 
-:root {
+:root,
+[data-theme='tomato'] {
+  /* 민트 메인 · 토마토 선택 */
+  --main: #abe2c4;
+  --main-deep: #3a9d6e;
+  --main-soft: #d8f3e6;
+  --tomato: #fe6653;
+  --tomato-deep: #e84f3c;
+  --tomato-soft: #ffd8d2;
+  --tomato-glow: rgba(254, 102, 83, 0.42);
+  --accent-mid: #ff7a6a;
+
+  --bg: #e8f6ee;
+  --surface: #ffffff;
+  --line: #cfe8da;
+  --ink: #1c2a22;
+  --muted: #6b8174;
+
+  --pin: #3a9d6e;
+  --pin-soft: #d8f3e6;
+  --pin-text: #1f6b48;
+
+  --sidebar: #1a2e24;
+  --sidebar-elevated: #243a30;
+  --sidebar-line: #2f4a3c;
+  --sidebar-muted: #8aa896;
+  --font: 'Manrope', sans-serif;
+
+  --scroll-thumb: #9fcbb3;
+  --scroll-thumb-dark: #3a5548;
+  --today-glow: rgba(171, 226, 196, 0.35);
+}
+
+[data-theme='blue'] {
+  --main: #93c5fd;
+  --main-deep: #2563eb;
+  --main-soft: #dbeafe;
+  --tomato: #3b82f6;
+  --tomato-deep: #1d4ed8;
+  --tomato-soft: #dbeafe;
+  --tomato-glow: rgba(59, 130, 246, 0.4);
+  --accent-mid: #60a5fa;
+
   --bg: #eef0f4;
   --surface: #ffffff;
   --line: #eceef2;
   --ink: #1c1f26;
   --muted: #8b919c;
+
   --pin: #3b82f6;
   --pin-soft: #dbeafe;
   --pin-text: #1d4ed8;
+
   --sidebar: #15181f;
   --sidebar-elevated: #1e222b;
   --sidebar-line: #2a2f3a;
   --sidebar-muted: #8b93a7;
-  --font: 'Manrope', sans-serif;
+
+  --scroll-thumb: #c8cdd6;
+  --scroll-thumb-dark: #3a4150;
+  --today-glow: rgba(147, 197, 253, 0.45);
 }
 
 * {
@@ -48,8 +95,8 @@ select {
 }
 
 ::selection {
-  background: var(--pin-soft);
-  color: var(--pin-text);
+  background: var(--tomato-soft);
+  color: var(--tomato-deep);
 }
 
 /* Fantastical-like soft scrollbar */
@@ -58,12 +105,107 @@ select {
   height: 8px;
 }
 .pt-scroll::-webkit-scrollbar-thumb {
-  background: #c8cdd6;
+  background: var(--scroll-thumb);
   border-radius: 999px;
 }
 .pt-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 .pt-scroll-dark::-webkit-scrollbar-thumb {
-  background: #3a4150;
+  background: var(--scroll-thumb-dark);
 }
+
+/* —— 선택 원: 가장자리 자글자글·흐린 일러스트 —— */
+.pt-tomato-blob {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  color: #fff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.pt-tomato-blob::before {
+  content: '';
+  position: absolute;
+  inset: -4%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 46% 54% 52% 48% / 50% 44% 56% 50%;
+  background:
+    radial-gradient(
+      circle at 38% 32%,
+      rgba(255, 255, 255, 0.28) 0%,
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 50% 52%,
+      var(--accent-mid) 0%,
+      var(--tomato) 52%,
+      color-mix(in srgb, var(--tomato) 70%, transparent) 78%,
+      color-mix(in srgb, var(--tomato) 20%, transparent) 90%,
+      transparent 97%
+    );
+  filter: url(#pt-tomato-edge) blur(0.4px);
+  transform: rotate(-3deg) scale(1.02);
+  opacity: 0.96;
+}
+
+.pt-tomato-blob::after {
+  content: '';
+  position: absolute;
+  inset: 2%;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  box-shadow: 0 0 4px 1px var(--tomato-glow);
+  filter: blur(0.8px);
+  opacity: 0.7;
+}
+
+@supports not (filter: url(#pt-tomato-edge)) {
+  .pt-tomato-blob::before {
+    filter: blur(0.9px) contrast(1.05);
+  }
+}
+
+.pt-tomato-blob--pill::before {
+  inset: -6% -4%;
+  border-radius: 48% 52% 55% 45% / 55% 48% 52% 45%;
+  transform: rotate(-2deg) scale(1.02, 1.06);
+}
+
+/* 오늘 표시 (비선택) */
+.pt-mint-today {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  color: var(--pin-text) !important;
+  background: transparent !important;
+}
+.pt-mint-today::before {
+  content: '';
+  position: absolute;
+  inset: -2%;
+  z-index: -1;
+  border-radius: 48% 52% 50% 50% / 50% 46% 54% 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--main) 0%,
+    var(--main) 68%,
+    var(--today-glow) 86%,
+    transparent 96%
+  );
+  filter: blur(0.45px);
+  opacity: 0.95;
+}
+
+/* Electron 배경 고정 창 — 투명 셸 */
+html.pt-desktop-pin,
+body.pt-desktop-pin,
+body.pt-desktop-pin #root {
+  background: transparent !important;
+  overflow: hidden;
+}
+

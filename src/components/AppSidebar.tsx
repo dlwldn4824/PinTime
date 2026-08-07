@@ -1,16 +1,16 @@
 import {
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Link2,
+  PanelLeftClose,
   Plus,
-  Sparkles,
+  UserRound,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCalendar } from '../context/CalendarContext'
 import { expandSchedulesInRange } from '../lib/recurrence'
 import { parseHour, toDateKey } from '../types'
+import { MainNav } from './MainNav'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -46,7 +46,11 @@ function buildMiniCells(year: number, month: number) {
   return cells
 }
 
-export function AppSidebar() {
+export function AppSidebar({
+  onCollapse,
+}: {
+  onCollapse?: () => void
+}) {
   const { schedules, allDay, selectedDate, goToDate, monthCursor } =
     useCalendar()
   const navigate = useNavigate()
@@ -68,6 +72,11 @@ export function AppSidebar() {
 
   const openDate = (dateKey: string) => {
     goToDate(dateKey)
+    try {
+      sessionStorage.setItem('pintime:openDay', dateKey)
+    } catch {
+      /* ignore */
+    }
     navigate('/calendar')
   }
 
@@ -101,62 +110,42 @@ export function AppSidebar() {
 
   return (
     <aside className="flex h-full w-[280px] shrink-0 flex-col bg-[var(--sidebar)] text-white">
-      <Link
-        to="/"
-        className="flex items-center gap-3 px-5 pt-5 pb-4 transition hover:opacity-90"
-        aria-label="홈으로 이동"
-      >
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--pin)] text-sm font-bold shadow-lg shadow-blue-500/20">
-          P
-        </div>
-        <div className="min-w-0">
-          <p className="text-sm font-bold tracking-tight">PinTime</p>
-          <p className="text-[11px] text-[var(--sidebar-muted)]">핀타임</p>
-        </div>
-      </Link>
-
-      <nav className="mx-3 mb-3 grid grid-cols-3 gap-1 rounded-2xl bg-[var(--sidebar-elevated)] p-1">
-        <NavLink
+      <div className="flex items-start gap-2 px-3 pt-4 pb-3">
+        <Link
           to="/"
-          end
-          className={({ isActive }) =>
-            `flex items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-semibold transition ${
-              isActive
-                ? 'bg-white/10 text-white'
-                : 'text-[var(--sidebar-muted)] hover:text-white'
-            }`
-          }
+          className="flex min-w-0 flex-1 items-center gap-3 px-2 transition hover:opacity-90"
+          aria-label="홈으로 이동"
         >
-          <Sparkles size={13} />
-          에이전트
-        </NavLink>
-        <NavLink
-          to="/calendar"
-          className={({ isActive }) =>
-            `flex items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-semibold transition ${
-              isActive
-                ? 'bg-white/10 text-white'
-                : 'text-[var(--sidebar-muted)] hover:text-white'
-            }`
-          }
-        >
-          <CalendarDays size={13} />
-          캘린더
-        </NavLink>
-        <NavLink
-          to="/share"
-          className={({ isActive }) =>
-            `flex items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-[11px] font-semibold transition ${
-              isActive
-                ? 'bg-white/10 text-white'
-                : 'text-[var(--sidebar-muted)] hover:text-white'
-            }`
-          }
-        >
-          <Link2 size={13} />
-          공유
-        </NavLink>
-      </nav>
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--main)] text-sm font-bold text-[var(--pin-text)] shadow-lg shadow-[var(--main)]/30">
+            P
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold tracking-tight">PinTime</p>
+            <p className="text-[11px] text-[var(--sidebar-muted)]">핀타임</p>
+          </div>
+        </Link>
+        {onCollapse && (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="mt-0.5 rounded-xl p-2 text-[var(--sidebar-muted)] transition hover:bg-white/10 hover:text-white"
+            title="사이드바 닫기"
+            aria-label="사이드바 닫기"
+          >
+            <PanelLeftClose size={18} />
+          </button>
+        )}
+      </div>
+
+      <MainNav variant="sidebar" className="mx-3 mb-3" />
+
+      <Link
+        to="/me"
+        className="mx-3 mb-3 flex items-center gap-2 rounded-xl px-3 py-2 text-[11px] font-semibold text-[var(--sidebar-muted)] transition hover:bg-white/10 hover:text-white"
+      >
+        <UserRound size={13} />
+        마이페이지 · 테마
+      </Link>
 
       <div className="mx-3 rounded-2xl bg-[var(--sidebar-elevated)] p-3">
         <div className="mb-2 flex items-center justify-between px-1">
@@ -216,11 +205,11 @@ export function AppSidebar() {
                 title={`${cell.key}로 이동`}
               >
                 <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold transition ${
-                    isToday
-                      ? 'bg-[var(--pin)] text-white'
-                      : isSelected
-                        ? 'bg-white/15 text-white ring-1 ring-white/40'
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-semibold tabular-nums transition ${
+                    isSelected
+                      ? 'bg-[var(--tomato)] text-white'
+                      : isToday
+                        ? 'bg-white/15 text-white ring-1 ring-[var(--main)]'
                         : cell.inMonth
                           ? 'text-white/85'
                           : 'text-white/25'

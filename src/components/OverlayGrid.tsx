@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTheme } from '../context/ThemeContext'
 import { type ShareRoom, type SlotKey } from '../types'
 import { slotAvailability } from '../lib/room'
 import {
@@ -15,7 +16,13 @@ import {
 } from '../lib/slots'
 
 const ROW_H = 34
-const GREEN = '#22c55e'
+
+function cssVar(name: string, fallback: string) {
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+  return v || fallback
+}
 
 type FilterMode = 'all' | 'everyone' | 'most'
 
@@ -32,6 +39,14 @@ export function OverlayGrid({
   selectedRange = null,
   onSelectRange,
 }: OverlayGridProps) {
+  const { theme } = useTheme()
+  const accent = useMemo(
+    () => ({
+      main: cssVar('--main', '#abe2c4'),
+      tomato: cssVar('--tomato', '#fe6653'),
+    }),
+    [theme],
+  )
   const [hover, setHover] = useState<{
     names: string[]
     count: number
@@ -217,7 +232,7 @@ export function OverlayGrid({
                     ? opt.id === 'everyone'
                       ? 'bg-emerald-600 text-white'
                       : opt.id === 'most'
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-[var(--tomato)] text-white'
                         : 'bg-slate-900 text-white'
                     : 'bg-slate-100 text-slate-700 ring-1 ring-slate-200 hover:bg-slate-200'
                 }`}
@@ -303,9 +318,9 @@ export function OverlayGrid({
                         visible ? 'bg-white' : 'bg-slate-50'
                       } ${
                         canPick
-                          ? 'cursor-crosshair hover:ring-2 hover:ring-inset hover:ring-blue-400'
+                          ? 'cursor-crosshair hover:ring-2 hover:ring-inset hover:ring-[var(--tomato)]'
                           : 'cursor-default'
-                      } ${isSelected ? 'ring-2 ring-inset ring-blue-500' : ''} ${
+                      } ${isSelected ? 'ring-2 ring-inset ring-[var(--tomato)]' : ''} ${
                         isConfirmed ? 'ring-2 ring-inset ring-amber-500' : ''
                       }`}
                       style={{ height: ROW_H }}
@@ -369,8 +384,8 @@ export function OverlayGrid({
                           background: isConfirmed
                             ? '#f59e0b'
                             : isSelected
-                              ? '#3b82f6'
-                              : GREEN,
+                              ? accent.tomato
+                              : accent.main,
                           opacity:
                             isConfirmed || isSelected
                               ? 0.85
@@ -398,7 +413,7 @@ export function OverlayGrid({
             {hover.names.join(', ')}
           </p>
           {onSelectRange && (
-            <p className="mt-1 text-[10px] text-blue-200">
+            <p className="mt-1 text-[10px] text-[var(--tomato-soft)]">
               드래그하면 그 길이로 확정할 수 있어요
             </p>
           )}

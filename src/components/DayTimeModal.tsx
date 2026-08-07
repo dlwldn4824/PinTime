@@ -78,7 +78,7 @@ export function DayTimeModal({
                 setStartHour(v)
                 if (endHour <= v) setEndHour(Math.min(v + 1, 22))
               }}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
             >
               {HOURS.map((h) => (
                 <option key={h} value={h}>
@@ -92,7 +92,7 @@ export function DayTimeModal({
             <select
               value={endHour}
               onChange={(e) => setEndHour(Number(e.target.value))}
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
             >
               {[...HOURS, 22]
                 .filter((h) => h > startHour)
@@ -114,7 +114,7 @@ export function DayTimeModal({
             if (e.key === 'Escape') onCancel()
           }}
           placeholder="일정 제목 입력"
-          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
         />
 
         <div className="mt-3">
@@ -133,7 +133,7 @@ export function DayTimeModal({
             type="button"
             disabled={!canSubmit}
             onClick={submit}
-            className="rounded-xl bg-blue-500 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-xl bg-[var(--tomato)] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--tomato-deep)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             등록
           </button>

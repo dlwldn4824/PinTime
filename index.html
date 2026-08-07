@@ -14,6 +14,21 @@
       rel="stylesheet"
     />
     <title>PinTime — 약속을 대신 잡아주는 AI 비서</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#abe2c4" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PinTime" />
+    <link rel="apple-touch-icon" href="/pwa-192.png" />
+    <script>
+      try {
+        var t = localStorage.getItem('pintime:theme')
+        document.documentElement.dataset.theme =
+          t === 'blue' || t === 'tomato' ? t : 'tomato'
+      } catch (e) {
+        document.documentElement.dataset.theme = 'tomato'
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

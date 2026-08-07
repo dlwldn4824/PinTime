@@ -1,5 +1,6 @@
 import { Eraser, Paintbrush } from 'lucide-react'
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { useTheme } from '../context/ThemeContext'
 import { type ShareRoom, type SlotKey } from '../types'
 import {
   columnSlotKey,
@@ -11,8 +12,14 @@ import {
 } from '../lib/slots'
 
 const ROW_H = 34
-const GREEN = '#22c55e'
 const PINK = '#fce7f3'
+
+function cssVar(name: string, fallback: string) {
+  const v = getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim()
+  return v || fallback
+}
 
 type AvailabilityEditorProps = {
   room: ShareRoom
@@ -31,6 +38,8 @@ export function AvailabilityEditor({
   title = '내 되는 시간',
   disabled = false,
 }: AvailabilityEditorProps) {
+  const { theme } = useTheme()
+  const green = useMemo(() => cssVar('--main', '#abe2c4'), [theme])
   const dragging = useRef(false)
   const mode = useRef<DragMode>('paint')
   const [draft, setDraft] = useState<Set<SlotKey> | null>(null)
@@ -167,7 +176,7 @@ export function AvailabilityEditor({
                       }`}
                       style={{
                         height: ROW_H,
-                        background: on ? GREEN : PINK,
+                        background: on ? green : PINK,
                       }}
                       onMouseDown={(e) => {
                         if (disabled || e.button !== 0) return

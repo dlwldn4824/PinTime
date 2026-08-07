@@ -10,16 +10,28 @@
 
 | | |
 |---|---|
-| 앱 | [Netlify](https://zesty-clafoutis-473edf.netlify.app) · [Vercel](https://pintime.vercel.app) |
+| 앱 (웹) | [Netlify](https://zesty-clafoutis-473edf.netlify.app) · [Vercel](https://pintime.vercel.app) |
+| **노트북 설치 (.exe)** | [GitHub Releases](https://github.com/dlwldn4824/PinTime/releases) — Windows 설치/포터블 |
+| **휴대폰 설치** | 브라우저에서 홈 화면에 추가 (PWA) · 마이페이지에서 위젯(주간/월간) 설정 |
 | 사업 소개서 (피치) | [Netlify `/pitch.html`](https://zesty-clafoutis-473edf.netlify.app/pitch.html) · [Vercel](https://pintime.vercel.app/pitch.html) |
 | 코드 | [github.com/dlwldn4824/PinTime](https://github.com/dlwldn4824/PinTime) |
 
 ```bash
 npm install
-npm run dev          # http://localhost:5173
+npm run dev                 # 웹 http://localhost:5173
+npm run electron:dev        # 노트북 로컬 앱 (Electron)
+npm run electron:build      # Windows .exe (release/)
 npm run build && npm run preview
 ```
 
+### 로컬 앱 로드맵
+
+| 환경 | 지금 | 다음 |
+|---|---|---|
+| 노트북 | Electron 앱 + **배경 고정 달력** (드래그로 이동 불가) | 자동 업데이트 · 트레이 |
+| 휴대폰 | PWA 홈 화면 설치 + **위젯용 주간/월간 선택** 저장 | Capacitor + OS 홈 위젯 (Android/iOS) |
+
+태그 `v0.1.0` 를 push 하면 GitHub Actions가 Windows 설치 파일을 Release에 올립니다.
 ---
 
 ## 왜 꼭 필요한가

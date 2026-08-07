@@ -197,13 +197,13 @@ export function CandidateDatePicker({
                   }}
                 >
                   <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold transition ${
+                    className={`flex h-8 w-8 items-center justify-center rounded-full text-[12px] font-semibold tabular-nums transition ${
                       selected
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-[var(--tomato)] text-white'
                         : isToday
-                          ? 'bg-blue-50 text-blue-600'
+                          ? 'bg-[var(--main-soft)] text-[var(--pin-text)] ring-1 ring-[var(--main)]'
                           : cell.inMonth
-                            ? 'text-slate-700 hover:bg-slate-50'
+                            ? 'text-slate-700 hover:bg-[var(--main-soft)]'
                             : 'text-slate-300'
                     }`}
                   >
@@ -233,8 +233,8 @@ export function CandidateDatePicker({
                   onClick={() => toggleWeekday(day)}
                   className={`rounded-xl py-3 text-sm font-bold transition ${
                     on
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                      ? 'bg-[var(--tomato)] text-white shadow-sm'
+                      : 'bg-slate-50 text-slate-500 hover:bg-[var(--main-soft)]'
                   }`}
                 >
                   {day}

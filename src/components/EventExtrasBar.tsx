@@ -4,6 +4,8 @@ import { RepeatPickerModal, repeatLabel } from './RepeatPickerModal'
 
 export type EventExtras = {
   repeat?: string
+  /** 반복 종료일 (YYYY-MM-DD, inclusive) */
+  repeatUntil?: string
   location?: string
   link?: string
   memo?: string
@@ -25,9 +27,15 @@ const CHIPS: Array<{
 type EventExtrasBarProps = {
   value: EventExtras
   onChange: (next: EventExtras) => void
+  /** 반복 시작 기준일 — 종료일 최소값 */
+  repeatAnchorDate?: string
 }
 
-export function EventExtrasBar({ value, onChange }: EventExtrasBarProps) {
+export function EventExtrasBar({
+  value,
+  onChange,
+  repeatAnchorDate,
+}: EventExtrasBarProps) {
   const [active, setActive] = useState<FieldKey | null>(null)
   const [repeatOpen, setRepeatOpen] = useState(false)
 
@@ -61,7 +69,7 @@ export function EventExtrasBar({ value, onChange }: EventExtrasBarProps) {
             size={14}
             className={repeatFilled ? 'text-violet-500' : 'text-violet-400'}
           />
-          {repeatLabel(value.repeat)}
+          {repeatLabel(value.repeat, value.repeatUntil)}
         </button>
 
         {CHIPS.map(({ key, label, icon: Icon }) => {
@@ -116,8 +124,16 @@ export function EventExtrasBar({ value, onChange }: EventExtrasBarProps) {
       <RepeatPickerModal
         open={repeatOpen}
         value={value.repeat}
+        until={value.repeatUntil}
+        minUntil={repeatAnchorDate}
         onClose={() => setRepeatOpen(false)}
-        onSelect={(repeat) => onChange({ ...value, repeat })}
+        onSelect={({ repeat, until }) =>
+          onChange({
+            ...value,
+            repeat: repeat || undefined,
+            repeatUntil: repeat ? until : undefined,
+          })
+        }
       />
     </div>
   )

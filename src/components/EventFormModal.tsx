@@ -170,7 +170,7 @@ export function EventFormModal({
             if (e.key === 'Escape') onCancel()
           }}
           placeholder="일정 제목 입력"
-          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+          className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
         />
 
         <div className="mt-4 divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-white">
@@ -284,7 +284,11 @@ export function EventFormModal({
         </div>
 
         {showExtras && (
-          <EventExtrasBar value={extras} onChange={setExtras} />
+          <EventExtrasBar
+            value={extras}
+            onChange={setExtras}
+            repeatAnchorDate={startDate}
+          />
         )}
 
         <div className="mt-4 flex items-center justify-between gap-2">
@@ -311,7 +315,7 @@ export function EventFormModal({
               type="button"
               disabled={!canSubmit}
               onClick={submit}
-              className="rounded-xl bg-blue-500 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-40"
+              className="rounded-xl bg-[var(--tomato)] px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-[var(--tomato-deep)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               {mode === 'edit' ? '저장' : '등록'}
             </button>

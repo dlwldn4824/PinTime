@@ -1,13 +1,20 @@
 {
-  "name": "PinTime",
+  "name": "pintime",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "PinTime — AI schedule agent calendar",
+  "author": "PinTime",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite --port 5173 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
+    "electron:build": "npm run build && electron-builder --win --x64",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:dir": "npm run build && electron-builder --dir"
   },
   "dependencies": {
     "lucide-react": "^1.25.0",
@@ -21,12 +28,66 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.4",
+    "cross-env": "^10.1.0",
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3",
     "oxlint": "^1.71.0",
     "playwright": "^1.51.0",
     "pptxgenjs": "^4.0.1",
     "sharp": "^0.35.3",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.1.1"
+    "vite": "^8.1.1",
+    "wait-on": "^9.1.0"
+  },
+  "build": {
+    "appId": "app.pintime.desktop",
+    "productName": "PinTime",
+    "directories": {
+      "output": "release",
+      "buildResources": "build-resources"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraMetadata": {
+      "main": "electron/main.cjs"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "PinTime-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "PinTime"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity",
+      "artifactName": "PinTime-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "PinTime-Portable-${version}.exe"
+    }
   }
 }

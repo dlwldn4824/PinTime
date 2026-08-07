@@ -1,5 +1,6 @@
 import { Search, X } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { DayAgendaSheet } from '../components/DayAgendaSheet'
 import { EventFormModal } from '../components/EventFormModal'
 import { MonthlyCalendar } from '../components/MonthlyCalendar'
 import { TitleModal } from '../components/TitleModal'
@@ -46,7 +47,6 @@ export function CalendarPage() {
     addAllDay,
     updateAllDay,
     removeAllDay,
-    clearCalendar,
     view,
     setView,
     selectedDate,
@@ -59,9 +59,51 @@ export function CalendarPage() {
     null,
   )
   const [editing, setEditing] = useState<Editing | null>(null)
+  const [daySheetDate, setDaySheetDate] = useState<string | null>(null)
+  const [returnToDay, setReturnToDay] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [searchOpen, setSearchOpen] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
+
+  const openDaySheet = (date: string) => {
+    setSelectedDate(date)
+    setDaySheetDate(date)
+  }
+
+  const reopenDayIfNeeded = () => {
+    if (!returnToDay) return
+    setDaySheetDate(returnToDay)
+    setReturnToDay(null)
+  }
+
+  const closeEditing = () => {
+    setEditing(null)
+    reopenDayIfNeeded()
+  }
+
+  const startAddForDay = (date: string) => {
+    setSelectedDate(date)
+    setReturnToDay(date)
+    setDaySheetDate(null)
+    setPending({
+      kind: 'month',
+      startDate: date,
+      endDate: date,
+      defaultAllDay: false,
+    })
+  }
+
+  useEffect(() => {
+    try {
+      const d = sessionStorage.getItem('pintime:openDay')
+      if (!d) return
+      sessionStorage.removeItem('pintime:openDay')
+      setDaySheetDate(d)
+      setSelectedDate(d)
+    } catch {
+      /* ignore */
+    }
+  }, [setSelectedDate])
 
   const searchHits = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -119,7 +161,12 @@ export function CalendarPage() {
           </h2>
           {view === 'week' && (
             <p className="text-xs text-[var(--muted)]">
-              빈 칸을 드래그해 일정을 핀하세요
+              날짜를 눌러 일정을 보고 · 빈 칸을 드래그해 추가하세요
+            </p>
+          )}
+          {view === 'month' && (
+            <p className="text-xs text-[var(--muted)]">
+              날짜를 누르면 그날 일정이 열려요 · +로 추가 · 일정을 눌러 수정
             </p>
           )}
         </div>
@@ -141,27 +188,8 @@ export function CalendarPage() {
               </button>
             ))}
           </div>
-          {(schedules.length > 0 || allDay.length > 0) && (
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  !window.confirm(
-                    '캘린더에 있는 일정을 모두 삭제할까요? (테스트 기록 초기화)',
-                  )
-                ) {
-                  return
-                }
-                clearCalendar()
-                showToast('캘린더 일정을 모두 삭제했어요')
-              }}
-              className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-100"
-            >
-              일정 전체 삭제
-            </button>
-          )}
           <div ref={searchRef} className="relative w-full max-w-[220px] sm:w-auto">
-            <div className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs text-[var(--muted)] focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100">
+            <div className="flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs text-[var(--muted)] focus-within:border-[var(--tomato)] focus-within:ring-2 focus-within:ring-[var(--tomato-soft)]">
               <Search size={13} className="shrink-0" />
               <input
                 value={query}
@@ -281,6 +309,7 @@ export function CalendarPage() {
               onSelectAllDay={(event) =>
                 setEditing({ kind: 'allday', event })
               }
+              onDayClick={openDaySheet}
             />
           ) : (
             <MonthlyCalendar
@@ -291,15 +320,7 @@ export function CalendarPage() {
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
               onMonthChange={(year, month) => setMonthCursor({ year, month })}
-              onDayClick={(date) => {
-                setSelectedDate(date)
-                setPending({
-                  kind: 'month',
-                  startDate: date,
-                  endDate: date,
-                  defaultAllDay: false,
-                })
-              }}
+              onDayClick={openDaySheet}
               onCreateAllDayRange={(startDate, endDate) =>
                 setPending({
                   kind: 'month',
@@ -319,11 +340,40 @@ export function CalendarPage() {
         </div>
       </div>
 
+      <DayAgendaSheet
+        open={!!daySheetDate}
+        date={daySheetDate ?? selectedDate}
+        schedules={schedules}
+        allDay={allDay}
+        onClose={() => setDaySheetDate(null)}
+        onAdd={() => {
+          if (daySheetDate) startAddForDay(daySheetDate)
+        }}
+        onSelectSchedule={(schedule) => {
+          setReturnToDay(daySheetDate)
+          setDaySheetDate(null)
+          setEditing({
+            kind: view === 'week' ? 'week-schedule' : 'month-schedule',
+            schedule,
+          })
+        }}
+        onSelectAllDay={(event) => {
+          setReturnToDay(daySheetDate)
+          setDaySheetDate(null)
+          setEditing({ kind: 'allday', event })
+        }}
+      />
+
       {/* Week 새 일정 */}
       <TitleModal
         open={pending?.kind === 'week'}
         mode="create"
         rangeLabel={weekCreateLabel}
+        repeatAnchorDate={
+          pending?.kind === 'week'
+            ? dateForWeekdayInWeek(selectedDate, pending.day)
+            : undefined
+        }
         initialStartHour={
           pending?.kind === 'week' ? pending.startHour : 10
         }
@@ -351,6 +401,12 @@ export function CalendarPage() {
         mode="edit"
         rangeLabel={weekEditLabel}
         editableHours
+        repeatAnchorDate={
+          editing?.kind === 'week-schedule'
+            ? editing.schedule.date ??
+              dateForWeekdayInWeek(selectedDate, editing.schedule.day)
+            : undefined
+        }
         initialTitle={
           editing?.kind === 'week-schedule' ? editing.schedule.title : ''
         }
@@ -363,6 +419,7 @@ export function CalendarPage() {
           editing?.kind === 'week-schedule'
             ? {
                 repeat: editing.schedule.repeat,
+                repeatUntil: editing.schedule.repeatUntil,
                 location: editing.schedule.location,
                 link: editing.schedule.link,
                 memo: editing.schedule.memo,
@@ -379,7 +436,7 @@ export function CalendarPage() {
             ? Math.ceil(parseHour(editing.schedule.end))
             : 11
         }
-        onCancel={() => setEditing(null)}
+        onCancel={closeEditing}
         onConfirm={({ title, color, startHour, endHour, extras }) => {
           if (editing?.kind !== 'week-schedule') return
           updateSchedule(editing.schedule.id, {
@@ -394,13 +451,13 @@ export function CalendarPage() {
             ...extras,
           })
           showToast('일정을 수정했어요')
-          setEditing(null)
+          closeEditing()
         }}
         onDelete={() => {
           if (editing?.kind !== 'week-schedule') return
           removeSchedule(editing.schedule.id)
           showToast('일정을 삭제했어요')
-          setEditing(null)
+          closeEditing()
         }}
       />
 
@@ -417,7 +474,10 @@ export function CalendarPage() {
         initialEndDate={
           pending?.kind === 'month' ? pending.endDate : selectedDate
         }
-        onCancel={() => setPending(null)}
+        onCancel={() => {
+          setPending(null)
+          reopenDayIfNeeded()
+        }}
         onConfirm={({
           title,
           color,
@@ -451,6 +511,8 @@ export function CalendarPage() {
             showToast('시간 일정을 등록했어요')
           }
           setPending(null)
+          setDaySheetDate(startDate)
+          setReturnToDay(null)
         }}
       />
 
@@ -469,7 +531,7 @@ export function CalendarPage() {
         initialEndDate={
           editing?.kind === 'allday' ? editing.event.endDate : selectedDate
         }
-        onCancel={() => setEditing(null)}
+        onCancel={closeEditing}
         onConfirm={({
           title,
           color,
@@ -501,13 +563,13 @@ export function CalendarPage() {
             })
           }
           showToast('일정을 수정했어요')
-          setEditing(null)
+          closeEditing()
         }}
         onDelete={() => {
           if (editing?.kind !== 'allday') return
           removeAllDay(editing.event.id)
           showToast('일정을 삭제했어요')
-          setEditing(null)
+          closeEditing()
         }}
       />
 
@@ -528,6 +590,7 @@ export function CalendarPage() {
           editing?.kind === 'month-schedule'
             ? {
                 repeat: editing.schedule.repeat,
+                repeatUntil: editing.schedule.repeatUntil,
                 location: editing.schedule.location,
                 link: editing.schedule.link,
                 memo: editing.schedule.memo,
@@ -554,7 +617,7 @@ export function CalendarPage() {
             ? Math.ceil(parseHour(editing.schedule.end))
             : 11
         }
-        onCancel={() => setEditing(null)}
+        onCancel={closeEditing}
         onConfirm={({
           title,
           color,
@@ -581,13 +644,13 @@ export function CalendarPage() {
             })
           }
           showToast('일정을 수정했어요')
-          setEditing(null)
+          closeEditing()
         }}
         onDelete={() => {
           if (editing?.kind !== 'month-schedule') return
           removeSchedule(editing.schedule.id)
           showToast('일정을 삭제했어요')
-          setEditing(null)
+          closeEditing()
         }}
       />
 

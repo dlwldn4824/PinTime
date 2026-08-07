@@ -181,7 +181,7 @@ export function SharePage() {
       <div className="pt-scroll mx-auto flex w-full max-w-lg flex-1 flex-col gap-4 overflow-auto p-4 sm:p-6">
         <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--tomato-soft)] text-[var(--tomato)]">
               <UserRound size={20} />
             </div>
             <div className="min-w-0 flex-1">
@@ -203,7 +203,7 @@ export function SharePage() {
               if (displayName.trim()) saveMyName(displayName.trim())
             }}
             placeholder="예: 지우"
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
           />
         </section>
 
@@ -216,7 +216,7 @@ export function SharePage() {
           <input
             value={roomTitle}
             onChange={(e) => setRoomTitle(e.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
             placeholder="예: 주말 일정 조율, 팀플 A 회의"
           />
 
@@ -244,7 +244,7 @@ export function SharePage() {
                   setStartHour(v)
                   if (endHour <= v) setEndHour(Math.min(v + 0.5, 24))
                 }}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
               >
                 {HOUR_OPTIONS.map((h) => (
                   <option key={h} value={h}>
@@ -258,7 +258,7 @@ export function SharePage() {
               <select
                 value={endHour}
                 onChange={(e) => setEndHour(Number(e.target.value))}
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
               >
                 {END_HOUR_OPTIONS.filter((h) => h > startHour).map((h) => (
                   <option key={h} value={h}>
@@ -275,7 +275,7 @@ export function SharePage() {
               {summary} · {hourToLabel(startHour)}–{hourToLabel(endHour)} · 30분
               칸
             </span>
-            <span className="mt-1 block text-blue-600">
+            <span className="mt-1 block text-[var(--tomato)]">
               내 캘린더에 있는 일정 시간은 자동으로 마스킹됩니다.
             </span>
           </p>
@@ -283,14 +283,14 @@ export function SharePage() {
           <button
             type="button"
             onClick={handleCreate}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-600"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--tomato)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--tomato-deep)]"
           >
             <Link2 size={16} />
             방 만들고 내 일정 반영
           </button>
 
           {activeRoom && (
-            <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-3">
+            <div className="mt-4 rounded-xl border border-[var(--tomato-soft)] bg-[var(--tomato-soft)]/60 p-3">
               <label className="text-[11px] font-medium text-slate-500">
                 방 이름
               </label>
@@ -307,7 +307,7 @@ export function SharePage() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
                 }}
-                className="mt-1 w-full rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                className="mt-1 w-full rounded-xl border border-[var(--tomato-soft)] bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[var(--tomato)] focus:ring-2 focus:ring-[var(--tomato-soft)]"
               />
               <p className="mt-1.5 text-[11px] text-slate-500">
                 {formatRoomRangeLabel(activeRoom)} · 참가자{' '}
@@ -317,7 +317,7 @@ export function SharePage() {
                 <button
                   type="button"
                   onClick={openInvitePanel}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--tomato)] px-3 py-2.5 text-xs font-semibold text-white hover:bg-[var(--tomato-deep)]"
                 >
                   <Share2 size={14} />
                   친구에게 보내기
@@ -359,7 +359,7 @@ export function SharePage() {
                   <button
                     type="button"
                     onClick={handleShareToFriends}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white"
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--tomato)] px-3 py-2.5 text-sm font-semibold text-white"
                   >
                     <Share2 size={15} />
                     공유하기
@@ -411,7 +411,7 @@ export function SharePage() {
                   >
                     <Link
                       to={href}
-                      className="flex min-w-0 flex-1 items-center justify-between rounded-lg px-2 py-1.5 transition hover:bg-blue-50"
+                      className="flex min-w-0 flex-1 items-center justify-between rounded-lg px-2 py-1.5 transition hover:bg-[var(--tomato-soft)]"
                     >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-slate-800">
@@ -422,7 +422,7 @@ export function SharePage() {
                           {count}명
                         </p>
                       </div>
-                      <span className="shrink-0 text-xs font-semibold text-blue-600">
+                      <span className="shrink-0 text-xs font-semibold text-[var(--tomato)]">
                         열기
                       </span>
                     </Link>

@@ -88,13 +88,18 @@ export function expandSchedulesInRange(
     // 반복: 앵커 필수. 없으면 범위 시작 주의 해당 요일을 앵커로 사용
     const startAnchor =
       anchor ?? dateForWeekdayInWeek(rangeStart, schedule.day)
+    const until = schedule.repeatUntil?.trim() || null
+    // 조회 상한: 달력 범위와 반복 종료일 중 더 이른 쪽
+    const cappedEnd =
+      until && until < rangeEnd ? until : rangeEnd
+    if (until && startAnchor > until) continue
+    if (cappedEnd < rangeStart) continue
 
     if (kind === 'daily') {
       let cur = startAnchor < rangeStart ? rangeStart : startAnchor
-      // 앵커 이전은 생성하지 않음
       if (cur < startAnchor) cur = startAnchor
-      while (cur <= rangeEnd) {
-        if (cur >= startAnchor) {
+      while (cur <= cappedEnd) {
+        if (cur >= startAnchor && (!until || cur <= until)) {
           out.push({
             ...schedule,
             date: cur,
@@ -110,8 +115,12 @@ export function expandSchedulesInRange(
     if (kind === 'weekly') {
       const targetDay = schedule.day
       let cur = rangeStart
-      while (cur <= rangeEnd) {
-        if (cur >= startAnchor && weekdayOfDateKey(cur) === targetDay) {
+      while (cur <= cappedEnd) {
+        if (
+          cur >= startAnchor &&
+          (!until || cur <= until) &&
+          weekdayOfDateKey(cur) === targetDay
+        ) {
           out.push({
             ...schedule,
             date: cur,
@@ -127,8 +136,8 @@ export function expandSchedulesInRange(
     if (kind === 'monthly') {
       const dayNum = parseDateKey(startAnchor).getDate()
       let cur = rangeStart
-      while (cur <= rangeEnd) {
-        if (cur >= startAnchor) {
+      while (cur <= cappedEnd) {
+        if (cur >= startAnchor && (!until || cur <= until)) {
           const d = parseDateKey(cur)
           const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
           if (d.getDate() === Math.min(dayNum, last)) {
@@ -150,8 +159,8 @@ export function expandSchedulesInRange(
       const mm = a.getMonth()
       const dd = a.getDate()
       let cur = rangeStart
-      while (cur <= rangeEnd) {
-        if (cur >= startAnchor) {
+      while (cur <= cappedEnd) {
+        if (cur >= startAnchor && (!until || cur <= until)) {
           const d = parseDateKey(cur)
           if (d.getMonth() === mm && d.getDate() === dd) {
             out.push({

@@ -24,3 +24,13 @@ createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  const desktopPin =
+    new URLSearchParams(window.location.search).get('mode') === 'desktop-pin'
+  if (!desktopPin) {
+    window.addEventListener('load', () => {
+      void navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+    })
+  }
+}

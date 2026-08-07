@@ -1,0 +1,40 @@
+/** Web App Manifest — 휴대폰 홈 화면 설치용 */
+{
+  "name": "PinTime",
+  "short_name": "PinTime",
+  "description": "약속을 대신 잡아주는 AI 일정 비서",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#e8f6ee",
+  "theme_color": "#abe2c4",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/pwa-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "캘린더",
+      "url": "/calendar",
+      "description": "주간·월간 캘린더 열기"
+    },
+    {
+      "name": "마이페이지",
+      "url": "/me",
+      "description": "테마 · 위젯 설정"
+    }
+  ]
+}

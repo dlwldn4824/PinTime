@@ -20,6 +20,8 @@ export type Schedule = {
   color?: string
   /** 단일 시간 일정 부가 정보 */
   repeat?: string
+  /** 반복 종료일 (YYYY-MM-DD, inclusive). 없으면 기한 없음 */
+  repeatUntil?: string
   location?: string
   link?: string
   memo?: string

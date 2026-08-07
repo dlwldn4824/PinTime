@@ -1,19 +1,80 @@
+import { PanelLeft } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { AppSidebar } from './components/AppSidebar'
 import { BottomNav } from './components/BottomNav'
+import { MainNav } from './components/MainNav'
 import { CalendarProvider } from './context/CalendarContext'
+import { ThemeProvider } from './context/ThemeContext'
+import { isDesktopPinMode } from './lib/platform'
 import { AgentPage } from './pages/AgentPage'
 import { CalendarPage } from './pages/CalendarPage'
+import { DesktopPinPage } from './pages/DesktopPinPage'
 import { JoinPage } from './pages/JoinPage'
+import { MyPage } from './pages/MyPage'
 import { SharePage } from './pages/SharePage'
 
+const SIDEBAR_KEY = 'pintime:sidebarOpen'
+
+function useSidebarOpen() {
+  const [open, setOpen] = useState(() => {
+    try {
+      const raw = localStorage.getItem(SIDEBAR_KEY)
+      if (raw === null) return true
+      return raw === '1'
+    } catch {
+      return true
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SIDEBAR_KEY, open ? '1' : '0')
+    } catch {
+      /* ignore */
+    }
+  }, [open])
+
+  return [open, setOpen] as const
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
+  const [sidebarOpen, setSidebarOpen] = useSidebarOpen()
+
   return (
     <div className="flex h-svh min-h-svh bg-[var(--bg)]">
-      <div className="hidden lg:block">
-        <AppSidebar />
+      <div
+        className={`hidden shrink-0 overflow-hidden transition-[width] duration-300 ease-out lg:block ${
+          sidebarOpen ? 'w-[280px]' : 'w-0'
+        }`}
+      >
+        <div className="h-full w-[280px]">
+          <AppSidebar onCollapse={() => setSidebarOpen(false)} />
+        </div>
       </div>
+
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* 사이드바 닫힘 · 데스크탑: 가운데 네비 3버튼 */}
+        {!sidebarOpen && (
+          <header className="relative z-30 hidden shrink-0 items-center border-b border-[var(--line)] bg-white/90 px-4 py-2.5 backdrop-blur-md lg:flex">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[var(--line)] bg-white px-3 py-2 text-xs font-semibold text-[var(--ink)] shadow-sm transition hover:bg-[var(--main-soft)]"
+              title="사이드바 열기"
+              aria-label="사이드바 열기"
+            >
+              <PanelLeft size={15} />
+              사이드바
+            </button>
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="pointer-events-auto">
+                <MainNav variant="floating" className="min-w-[280px]" />
+              </div>
+            </div>
+          </header>
+        )}
+
         <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
         <div className="lg:hidden">
           <BottomNav />
@@ -32,7 +93,7 @@ function JoinShell({ children }: { children: React.ReactNode }) {
           className="flex items-center gap-2.5 sm:gap-3 transition hover:opacity-90"
           aria-label="홈으로 이동"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--pin)] text-sm font-bold text-white sm:h-9 sm:w-9">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--main)] text-sm font-bold text-[var(--pin-text)] sm:h-9 sm:w-9">
             P
           </div>
           <div className="min-w-0">
@@ -51,43 +112,98 @@ function JoinShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  if (isDesktopPinMode()) {
+    return (
+      <ThemeProvider>
+        <CalendarProvider>
+          <DesktopPinPage />
+        </CalendarProvider>
+      </ThemeProvider>
+    )
+  }
+
   return (
-    <CalendarProvider>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Shell>
-              <AgentPage />
-            </Shell>
-          }
-        />
-        <Route
-          path="/calendar"
-          element={
-            <Shell>
-              <CalendarPage />
-            </Shell>
-          }
-        />
-        <Route
-          path="/share"
-          element={
-            <Shell>
-              <SharePage />
-            </Shell>
-          }
-        />
-        <Route
-          path="/join/:roomId"
-          element={
-            <JoinShell>
-              <JoinPage />
-            </JoinShell>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </CalendarProvider>
+    <ThemeProvider>
+      <CalendarProvider>
+        {/* 선택 원 가장자리 텍스처 필터 */}
+        <svg
+          aria-hidden
+          width="0"
+          height="0"
+          className="pointer-events-none absolute"
+          style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+        >
+          <defs>
+            <filter
+              id="pt-tomato-edge"
+              x="-40%"
+              y="-40%"
+              width="180%"
+              height="180%"
+              colorInterpolationFilters="sRGB"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.9"
+                numOctaves="3"
+                seed="7"
+                result="noise"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="noise"
+                scale="2"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feGaussianBlur stdDeviation="0.25" />
+            </filter>
+          </defs>
+        </svg>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Shell>
+                <AgentPage />
+              </Shell>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <Shell>
+                <CalendarPage />
+              </Shell>
+            }
+          />
+          <Route
+            path="/share"
+            element={
+              <Shell>
+                <SharePage />
+              </Shell>
+            }
+          />
+          <Route
+            path="/me"
+            element={
+              <Shell>
+                <MyPage />
+              </Shell>
+            }
+          />
+          <Route
+            path="/join/:roomId"
+            element={
+              <JoinShell>
+                <JoinPage />
+              </JoinShell>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </CalendarProvider>
+    </ThemeProvider>
   )
 }

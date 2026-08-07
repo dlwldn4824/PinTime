@@ -552,7 +552,7 @@ export function JoinPage() {
         </p>
         <Link
           to="/share"
-          className="mt-2 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white"
+          className="mt-2 rounded-xl bg-[var(--tomato)] px-4 py-2.5 text-sm font-semibold text-white"
         >
           공유 페이지로
         </Link>
@@ -586,13 +586,13 @@ export function JoinPage() {
                   if (e.key === 'Enter') saveTitle()
                   if (e.key === 'Escape') setEditingTitle(false)
                 }}
-                className="w-full rounded-xl border border-blue-300 bg-white px-3 py-1.5 text-base font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-[var(--tomato)]/40 bg-white px-3 py-1.5 text-base font-bold text-slate-900 outline-none focus:ring-2 focus:ring-[var(--tomato-soft)]"
                 placeholder="방 이름"
               />
               <button
                 type="button"
                 onClick={saveTitle}
-                className="shrink-0 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white"
+                className="shrink-0 rounded-lg bg-[var(--tomato)] px-2.5 py-1.5 text-xs font-semibold text-white"
               >
                 저장
               </button>
@@ -609,7 +609,7 @@ export function JoinPage() {
               </h2>
               <Pencil
                 size={14}
-                className="shrink-0 text-slate-400 group-hover:text-blue-600"
+                className="shrink-0 text-slate-400 group-hover:text-[var(--tomato)]"
               />
             </button>
           )}
@@ -621,7 +621,7 @@ export function JoinPage() {
         <button
           type="button"
           onClick={openInvitePanel}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[var(--tomato)] px-3 py-2 text-xs font-semibold text-white hover:bg-[var(--tomato-deep)]"
         >
           <Share2 size={14} />
           친구에게 보내기
@@ -654,7 +654,7 @@ export function JoinPage() {
               <button
                 type="button"
                 onClick={nativeShareInvite}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white"
+                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--tomato)] px-3 py-2.5 text-sm font-semibold text-white"
               >
                 <Share2 size={15} />
                 공유하기
@@ -680,29 +680,29 @@ export function JoinPage() {
       )}
 
       {showSyncHint && syncUrl && registered && !isGuestJoin && (
-        <section className="shrink-0 rounded-2xl border-2 border-blue-300 bg-blue-50/90 p-3 sm:p-4">
+        <section className="shrink-0 rounded-2xl border-2 border-[var(--tomato)]/40 bg-[var(--tomato-soft)]/90 p-3 sm:p-4">
           <div className="flex items-start gap-2">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--tomato)] text-white">
               <Share2 size={16} />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-blue-950">
+              <p className="text-sm font-bold text-[var(--tomato-deep)]">
                 호스트에게 가능 시간 전달
               </p>
-              <p className="mt-0.5 text-[11px] leading-relaxed text-blue-900/80">
+              <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--tomato-deep)]/80">
                 서버가 없어서 호스트 기기에 바로 반영되지 않아요. 아래 링크를
                 카톡 등으로 보내면, 호스트가 열 때 내 가능 시간이 합쳐집니다.
               </p>
             </div>
           </div>
-          <p className="mt-3 break-all rounded-xl bg-white px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-blue-200">
+          <p className="mt-3 break-all rounded-xl bg-white px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-[var(--tomato-soft)]">
             {syncUrl}
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               onClick={nativeShareSync}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white"
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[var(--tomato)] px-3 py-2.5 text-sm font-semibold text-white"
             >
               <Share2 size={15} />
               호스트에게 공유
@@ -808,7 +808,7 @@ export function JoinPage() {
                     showToast('전달 링크를 만들지 못했어요')
                   }
                 }}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--tomato)] hover:text-[var(--tomato-deep)]"
               >
                 <Share2 size={12} />
                 호스트에게 전달
@@ -817,7 +817,7 @@ export function JoinPage() {
             <button
               type="button"
               onClick={handleSwitchAccount}
-              className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800"
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--tomato)] hover:text-[var(--tomato-deep)]"
             >
               <UserPlus size={12} />
               새 이름으로 참여
@@ -888,12 +888,12 @@ export function JoinPage() {
 
       <div className="mx-auto grid w-full max-w-3xl shrink-0 gap-2.5 sm:gap-3">
         {/* 일정 확정 — 한 줄 액션 바 */}
-        <div className="flex flex-col gap-2 rounded-xl border border-blue-200 bg-blue-50/70 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3">
+        <div className="flex flex-col gap-2 rounded-xl border border-[var(--tomato-soft)] bg-[var(--tomato-soft)]/70 p-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3">
           <div className="min-w-0">
-            <p className="text-xs font-bold text-blue-900">일정 확정</p>
+            <p className="text-xs font-bold text-[var(--tomato-deep)]">일정 확정</p>
             {preview && activeRange ? (
               <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">
-                <span className="text-blue-700">{preview.label}</span>
+                <span className="text-[var(--tomato-deep)]">{preview.label}</span>
                 <span className="ml-1 text-xs font-medium text-slate-500">
                   {activeRange.durationMin}분
                 </span>
@@ -914,7 +914,7 @@ export function JoinPage() {
             type="button"
             onClick={handleConfirm}
             disabled={!activeRange || room.participants.length === 0}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-[var(--tomato)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--tomato-deep)] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <CalendarPlus size={16} />
             {room.confirmed?.slot === activeRange?.startSlot &&
