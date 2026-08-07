@@ -32,6 +32,18 @@ npm run build && npm run preview
 | 휴대폰 | PWA 홈 화면 설치 + **위젯용 주간/월간 선택** 저장 | Capacitor + OS 홈 위젯 (Android/iOS) |
 
 태그 `v0.1.0` 를 push 하면 GitHub Actions가 Windows 설치 파일을 Release에 올립니다.
+
+### 사용 통계 · 다운로드
+
+| | |
+|---|---|
+| 웹 | 마이페이지에서 **익명 사용 통계** 동의(기본 OFF). 화면/이벤트 이름만. `VITE_ANALYTICS_URL` 설정 시에만 서버로 전송 |
+| `.exe` 다운로드 수 | [GitHub Releases](https://github.com/dlwldn4824/PinTime/releases) 자산별 Downloads 카운트 (앱 내부 로그 없음) |
+
+```bash
+# 선택: 웹 이벤트 수신 URL
+cp .env.example .env   # VITE_ANALYTICS_URL=https://...
+```
 ---
 
 ## 왜 꼭 필요한가

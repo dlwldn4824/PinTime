@@ -1,5 +1,6 @@
 import {
   Check,
+  Download,
   Monitor,
   Palette,
   Smartphone,
@@ -9,6 +10,13 @@ import {
 import { useEffect, useState } from 'react'
 import { useCalendar } from '../context/CalendarContext'
 import { useTheme, type AppTheme } from '../context/ThemeContext'
+import {
+  clearAnalyticsDebug,
+  loadAnalyticsConsent,
+  loadAnalyticsDebug,
+  saveAnalyticsConsent,
+  track,
+} from '../lib/analytics'
 import {
   getDesktopApi,
   isElectronApp,
@@ -54,6 +62,8 @@ export function MyPage() {
     loadWidgetView(),
   )
   const [widgetEnabled, setWidgetEnabled] = useState(() => loadWidgetEnabled())
+  const [analyticsOn, setAnalyticsOn] = useState(() => loadAnalyticsConsent())
+  const [debugEvents, setDebugEvents] = useState(() => loadAnalyticsDebug())
   const [installEvt, setInstallEvt] =
     useState<BeforeInstallPromptEvent | null>(null)
   const [installed, setInstalled] = useState(false)
@@ -145,7 +155,10 @@ export function MyPage() {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setTheme(item.id)}
+                  onClick={() => {
+                    setTheme(item.id)
+                    track('theme_change', { theme: item.id })
+                  }}
                   className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition ${
                     active
                       ? 'border-[var(--tomato)] bg-[var(--tomato-soft)]/50 ring-2 ring-[var(--tomato)]/30'
@@ -179,6 +192,106 @@ export function MyPage() {
             })}
           </div>
         </section>
+
+        {/* 웹 사용 통계 · 앱 다운로드 수 */}
+        {!electron && (
+          <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Download size={16} className="text-[var(--tomato)]" />
+              <h2 className="text-sm font-bold text-[var(--ink)]">
+                사용 통계 · 다운로드
+              </h2>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+              웹만 해당합니다. 일정·할일·공유 내용은 보내지 않고, 화면/기능
+              이름 같은 익명 이벤트만 보냅니다. 기본은 꺼져 있어요.
+            </p>
+
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--bg)]/60 px-3.5 py-3">
+              <div>
+                <p className="text-sm font-semibold text-[var(--ink)]">
+                  익명 사용 통계 허용
+                </p>
+                <p className="text-[11px] text-[var(--muted)]">
+                  경로·이벤트명만 · Electron 앱에서는 수집 안 함
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={analyticsOn}
+                onClick={() => {
+                  const next = !analyticsOn
+                  if (next) {
+                    saveAnalyticsConsent(true)
+                    setAnalyticsOn(true)
+                    track('analytics_opt_in')
+                    setDebugEvents(loadAnalyticsDebug())
+                  } else {
+                    track('analytics_opt_out')
+                    saveAnalyticsConsent(false)
+                    setAnalyticsOn(false)
+                  }
+                }}
+                className={`relative h-7 w-12 rounded-full transition ${
+                  analyticsOn ? 'bg-[var(--tomato)]' : 'bg-slate-200'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
+                    analyticsOn ? 'translate-x-5' : ''
+                  }`}
+                />
+              </button>
+            </div>
+
+            <div className="mt-3 rounded-xl bg-[var(--bg)] px-3.5 py-3 text-[11px] leading-relaxed text-[var(--muted)]">
+              <p className="font-semibold text-[var(--ink)]">
+                노트북 앱 다운로드 수
+              </p>
+              <p className="mt-1">
+                `.exe` 다운로드 횟수는 GitHub Releases 자산에 표시됩니다. 앱
+                안에서는 별도 로그를 보내지 않습니다.
+              </p>
+              <a
+                className="mt-2 inline-block font-semibold text-[var(--tomato)] underline-offset-2 hover:underline"
+                href="https://github.com/dlwldn4824/PinTime/releases"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Releases에서 확인 →
+              </a>
+            </div>
+
+            {analyticsOn && debugEvents.length > 0 && (
+              <div className="mt-3">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] font-semibold text-[var(--muted)]">
+                    이 기기 최근 이벤트 (디버그)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearAnalyticsDebug()
+                      setDebugEvents([])
+                    }}
+                    className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
+                  >
+                    비우기
+                  </button>
+                </div>
+                <ul className="mt-1.5 max-h-28 overflow-auto rounded-xl bg-slate-50 px-2.5 py-2 font-mono text-[10px] text-slate-600">
+                  {debugEvents.slice(0, 8).map((e, i) => (
+                    <li key={`${e.t}-${i}`}>
+                      {e.name}
+                      {e.props?.path ? ` ${String(e.props.path)}` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* 노트북 — 배경 고정 달력 */}
         <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">

@@ -26,7 +26,7 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
 
   return (
     <nav
-      className={`grid grid-cols-5 gap-0.5 rounded-2xl p-1 ${
+      className={`grid grid-cols-5 gap-1 rounded-2xl p-1 ${
         floating
           ? 'bg-[var(--sidebar)] shadow-lg shadow-black/10 ring-1 ring-black/5'
           : 'bg-[var(--sidebar-elevated)]'
@@ -39,7 +39,7 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
           to={to}
           end={end}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[9px] font-semibold transition sm:flex-row sm:gap-1 sm:px-1.5 sm:py-2 sm:text-[10px] ${
+            `flex min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 py-2 text-[10px] font-semibold leading-none transition ${
               isActive
                 ? 'bg-[var(--tomato)] text-white shadow-sm shadow-[var(--tomato)]/30'
                 : floating
@@ -48,8 +48,8 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
             }`
           }
         >
-          <Icon size={13} />
-          {label}
+          <Icon size={14} className="shrink-0" />
+          <span className="max-w-full truncate whitespace-nowrap">{label}</span>
         </NavLink>
       ))}
     </nav>

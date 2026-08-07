@@ -40,6 +40,18 @@ export function loadTodos(): TodoState {
 
 export function saveTodos(state: TodoState) {
   localStorage.setItem(TODO_KEY, JSON.stringify(state))
+  window.dispatchEvent(new CustomEvent('pintime:todos'))
+}
+
+export function toggleTodoDone(id: string): TodoState {
+  const state = loadTodos()
+  const next = {
+    items: state.items.map((t) =>
+      t.id === id ? { ...t, done: !t.done } : t,
+    ),
+  }
+  saveTodos(next)
+  return next
 }
 
 export function createTodo(input: {

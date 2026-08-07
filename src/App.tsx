@@ -1,6 +1,7 @@
 import { PanelLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import { AnalyticsRouteTracker } from './components/AnalyticsRouteTracker'
 import { AppSidebar } from './components/AppSidebar'
 import { BottomNav } from './components/BottomNav'
 import { MainNav } from './components/MainNav'
@@ -70,7 +71,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="pointer-events-auto">
-                <MainNav variant="floating" className="min-w-[360px]" />
+                <MainNav variant="floating" className="w-[min(420px,92vw)]" />
               </div>
             </div>
           </header>
@@ -131,6 +132,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <CalendarProvider>
+        <AnalyticsRouteTracker />
         {/* 선택 원 가장자리 텍스처 필터 */}
         <svg
           aria-hidden

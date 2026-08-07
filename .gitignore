@@ -25,6 +25,7 @@ release
 *.sw?
 .vercel
 .env*
+!.env.example
 
 # Local Netlify folder
 .netlify
