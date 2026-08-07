@@ -265,11 +265,6 @@ export function DayAgendaSheet({
           </form>
 
           <ul className="space-y-1.5">
-            {dayTodos.length === 0 && (
-              <li className="rounded-xl bg-[var(--bg)] px-3 py-3 text-center text-[11px] text-[var(--muted)]">
-                이 날 할 일과 상시 할 일이 없어요
-              </li>
-            )}
             {dayTodos.map((item) => (
               <li
                 key={item.id}
