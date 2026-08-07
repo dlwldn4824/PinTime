@@ -184,7 +184,7 @@ export function CalendarPage() {
                     : 'text-[var(--muted)]'
                 }`}
               >
-                {mode === 'week' ? 'Week' : 'Month'}
+                {mode === 'week' ? '주간' : '월간'}
               </button>
             ))}
           </div>

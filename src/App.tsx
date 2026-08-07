@@ -6,13 +6,14 @@ import { BottomNav } from './components/BottomNav'
 import { MainNav } from './components/MainNav'
 import { CalendarProvider } from './context/CalendarContext'
 import { ThemeProvider } from './context/ThemeContext'
-import { isDesktopPinMode } from './lib/platform'
+import { isDesktopPinMode, shouldRenderDesktopPin } from './lib/platform'
 import { AgentPage } from './pages/AgentPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { DesktopPinPage } from './pages/DesktopPinPage'
 import { JoinPage } from './pages/JoinPage'
 import { MyPage } from './pages/MyPage'
 import { SharePage } from './pages/SharePage'
+import { TodoPage } from './pages/TodoPage'
 
 const SIDEBAR_KEY = 'pintime:sidebarOpen'
 
@@ -69,7 +70,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             </button>
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="pointer-events-auto">
-                <MainNav variant="floating" className="min-w-[280px]" />
+                <MainNav variant="floating" className="min-w-[360px]" />
               </div>
             </div>
           </header>
@@ -112,7 +113,7 @@ function JoinShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  if (isDesktopPinMode()) {
+  if (shouldRenderDesktopPin()) {
     return (
       <ThemeProvider>
         <CalendarProvider>
@@ -120,6 +121,11 @@ export default function App() {
         </CalendarProvider>
       </ThemeProvider>
     )
+  }
+
+  // 브라우저에서 ?mode=desktop-pin 잠금 방지
+  if (isDesktopPinMode()) {
+    return <Navigate to="/calendar" replace />
   }
 
   return (
@@ -182,6 +188,14 @@ export default function App() {
             element={
               <Shell>
                 <SharePage />
+              </Shell>
+            }
+          />
+          <Route
+            path="/todo"
+            element={
+              <Shell>
+                <TodoPage />
               </Shell>
             }
           />

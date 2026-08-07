@@ -74,6 +74,8 @@ export function JoinPage() {
   const [syncUrl, setSyncUrl] = useState('')
   const [syncCopied, setSyncCopied] = useState(false)
   const [showSyncHint, setShowSyncHint] = useState(false)
+  /** 나중에 하기로 접어도 sync 미전달이면 배너 유지 */
+  const [syncPending, setSyncPending] = useState(false)
   /** 표에서 직접 칠어 저장된 값과 달라진 경우 (캘린더 자동반영 전 확인용) */
   const [slotsDirty, setSlotsDirty] = useState(false)
 
@@ -134,6 +136,8 @@ export function JoinPage() {
       if (sync) {
         applySession(resolved)
         setShowSyncHint(false)
+        setSyncPending(false)
+        setSyncUrl('')
         showToast(
           `참가자 ${resolved.participants.length}명의 가능 시간을 반영했어요`,
         )
@@ -141,13 +145,22 @@ export function JoinPage() {
         return
       }
 
-      // 타임픽식: 초대 링크(guest=1)는 기존 로그인 무시 → 새 이름 참여
+      // 타임픽식: 초대 링크(guest=1)는 새 참여가 기본.
+      // 단, 이미 이 방 세션+참가자가 있으면 호스트/재방문으로 유지 (자기 초대 링크 열기 함정 방지)
       if (guest) {
-        clearRoomSession(resolved.id)
-        resetAsGuest()
-        // 방은 로컬에 저장됐으니 긴 d는 버리고 guest만 유지
-        if (encoded) {
-          setSearchParams({ guest: '1' }, { replace: true })
+        const session = loadRoomSession(resolved.id)
+        const existing = session
+          ? findParticipant(resolved, session.name, session.password)
+          : null
+        if (existing) {
+          applySession(resolved)
+          setSearchParams({}, { replace: true })
+        } else {
+          clearRoomSession(resolved.id)
+          resetAsGuest()
+          if (encoded) {
+            setSearchParams({ guest: '1' }, { replace: true })
+          }
         }
       } else {
         applySession(resolved)
@@ -250,13 +263,21 @@ export function JoinPage() {
         const url = await syncLinkFor(result.room)
         setSyncUrl(url)
         setShowSyncHint(true)
+        setSyncPending(true)
         setSyncCopied(false)
+        try {
+          await navigator.clipboard.writeText(url)
+          setSyncCopied(true)
+          window.setTimeout(() => setSyncCopied(false), 2000)
+        } catch {
+          /* clipboard may be blocked */
+        }
       } catch {
         setShowSyncHint(false)
       }
       showToast(
         cameAsGuest
-          ? `${result.participant.name}님 등록 완료 · 아래 링크를 호스트에게 보내 주세요`
+          ? `${result.participant.name}님 등록 완료 · 전달 링크를 복사해 두었어요. 호스트에게 보내 주세요`
           : `${result.participant.name}님 시간이 업데이트됐어요 · 호스트에게 다시 전달해 주세요`,
       )
       return
@@ -692,6 +713,7 @@ export function JoinPage() {
               <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--tomato-deep)]/80">
                 서버가 없어서 호스트 기기에 바로 반영되지 않아요. 아래 링크를
                 카톡 등으로 보내면, 호스트가 열 때 내 가능 시간이 합쳐집니다.
+                {syncCopied ? ' · 클립보드에 복사됨' : ''}
               </p>
             </div>
           </div>
@@ -718,11 +740,57 @@ export function JoinPage() {
           </div>
           <button
             type="button"
-            onClick={() => setShowSyncHint(false)}
+            onClick={() => {
+              if (
+                !window.confirm(
+                  '지금 보내지 않으면 호스트 캘린더에 내 가능 시간이 반영되지 않습니다. 나중에 할까요?',
+                )
+              ) {
+                return
+              }
+              setShowSyncHint(false)
+              setSyncPending(true)
+            }}
             className="mt-2 w-full rounded-xl px-3 py-2 text-xs font-semibold text-slate-500 hover:bg-white/70"
           >
             나중에 하기
           </button>
+        </section>
+      )}
+
+      {!showSyncHint && syncPending && syncUrl && registered && !isGuestJoin && (
+        <section className="shrink-0 rounded-xl border border-[var(--tomato)]/30 bg-[var(--tomato-soft)]/60 px-3 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] font-semibold text-[var(--tomato-deep)]">
+              아직 호스트에게 전달하지 않았어요
+            </p>
+            <div className="flex gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowSyncHint(true)}
+                className="rounded-lg bg-[var(--tomato)] px-2.5 py-1.5 text-[11px] font-bold text-white"
+              >
+                전달하기
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      '전달 안내를 숨길까요? (링크는 다시 만들 수 있어요)',
+                    )
+                  ) {
+                    return
+                  }
+                  setSyncPending(false)
+                  setSyncUrl('')
+                }}
+                className="rounded-lg px-2.5 py-1.5 text-[11px] font-semibold text-slate-500 hover:bg-white/80"
+              >
+                숨기기
+              </button>
+            </div>
+          </div>
         </section>
       )}
 

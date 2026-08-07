@@ -1,10 +1,18 @@
-import { CalendarDays, Link2, Sparkles } from 'lucide-react'
+import {
+  CalendarDays,
+  Link2,
+  ListTodo,
+  Sparkles,
+  UserRound,
+} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const items = [
   { to: '/', label: '에이전트', icon: Sparkles, end: true },
   { to: '/calendar', label: '캘린더', icon: CalendarDays, end: false },
   { to: '/share', label: '공유', icon: Link2, end: false },
+  { to: '/todo', label: '할일', icon: ListTodo, end: false },
+  { to: '/me', label: '마이', icon: UserRound, end: false },
 ] as const
 
 type MainNavProps = {
@@ -18,7 +26,7 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
 
   return (
     <nav
-      className={`grid grid-cols-3 gap-1 rounded-2xl p-1 ${
+      className={`grid grid-cols-5 gap-0.5 rounded-2xl p-1 ${
         floating
           ? 'bg-[var(--sidebar)] shadow-lg shadow-black/10 ring-1 ring-black/5'
           : 'bg-[var(--sidebar-elevated)]'
@@ -31,7 +39,7 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
           to={to}
           end={end}
           className={({ isActive }) =>
-            `flex items-center justify-center gap-1 rounded-xl px-2.5 py-2 text-[11px] font-semibold transition sm:px-3 ${
+            `flex flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[9px] font-semibold transition sm:flex-row sm:gap-1 sm:px-1.5 sm:py-2 sm:text-[10px] ${
               isActive
                 ? 'bg-[var(--tomato)] text-white shadow-sm shadow-[var(--tomato)]/30'
                 : floating

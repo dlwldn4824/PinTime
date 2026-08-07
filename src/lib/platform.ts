@@ -38,6 +38,19 @@ export function isDesktopPinMode() {
   return new URLSearchParams(window.location.search).get('mode') === 'desktop-pin'
 }
 
+/** Electron 핀 창에서만 핀 셸 사용. 브라우저는 진입 금지. */
+export function shouldRenderDesktopPin() {
+  return isDesktopPinMode() && isElectronApp()
+}
+
+/** 브라우저가 ?mode=desktop-pin 으로 들어온 경우 URL 정리 후 /calendar 로 */
+export function stripDesktopPinQueryIfBrowser() {
+  if (typeof window === 'undefined') return false
+  if (!isDesktopPinMode() || isElectronApp()) return false
+  window.history.replaceState({}, '', '/calendar')
+  return true
+}
+
 export function loadWidgetView(): CalendarWidgetView {
   try {
     const raw = localStorage.getItem(WIDGET_VIEW_KEY)

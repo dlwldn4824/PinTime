@@ -4,9 +4,15 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { clearAllPinTimeData } from './lib/storage'
+import {
+  isDesktopPinMode,
+  isElectronApp,
+  stripDesktopPinQueryIfBrowser,
+} from './lib/platform'
 
 // http://localhost:5173/?reset=1 → 로컬 테스트 기록 초기화
 if (typeof window !== 'undefined') {
+  stripDesktopPinQueryIfBrowser()
   const params = new URLSearchParams(window.location.search)
   if (params.get('reset') === '1') {
     const removed = clearAllPinTimeData()
@@ -26,9 +32,7 @@ createRoot(document.getElementById('root')!).render(
 )
 
 if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  const desktopPin =
-    new URLSearchParams(window.location.search).get('mode') === 'desktop-pin'
-  if (!desktopPin) {
+  if (!(isDesktopPinMode() && isElectronApp())) {
     window.addEventListener('load', () => {
       void navigator.serviceWorker.register('/sw.js').catch(() => undefined)
     })

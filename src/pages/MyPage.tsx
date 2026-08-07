@@ -226,21 +226,22 @@ export function MyPage() {
           <div className="flex items-center gap-2">
             <Smartphone size={16} className="text-[var(--tomato)]" />
             <h2 className="text-sm font-bold text-[var(--ink)]">
-              휴대폰 · 위젯
+              휴대폰 · 위젯 설정
             </h2>
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
-            홈 화면에 앱을 설치한 뒤, 위젯에 쓸 달력(주간/월간)을 고릅니다.
-            네이티브 홈 위젯은 Capacitor 빌드 단계에서 OS 위젯으로 연결됩니다.
+            지금은 설정만 기기에 저장합니다. 홈 화면 OS 위젯 연동은 준비
+            중이에요. PWA로 앱을 설치한 뒤, 나중에 쓸 주간/월간 선호를 골라
+            두세요.
           </p>
 
           <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--bg)]/60 px-3.5 py-3">
             <div>
               <p className="text-sm font-semibold text-[var(--ink)]">
-                위젯 사용
+                위젯 설정 저장
               </p>
               <p className="text-[11px] text-[var(--muted)]">
-                설정값을 기기에 저장합니다
+                홈 위젯을 바로 만들지 않습니다
               </p>
             </div>
             <button
@@ -261,7 +262,7 @@ export function MyPage() {
           </div>
 
           <p className="mt-3 text-[11px] font-semibold text-[var(--muted)]">
-            위젯 달력 종류
+            선호 달력 종류 (연동 예정)
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {(

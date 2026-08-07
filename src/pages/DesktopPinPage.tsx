@@ -1,15 +1,17 @@
+import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { MonthlyCalendar } from '../components/MonthlyCalendar'
 import { WeeklyCalendar } from '../components/WeeklyCalendar'
 import { useCalendar } from '../context/CalendarContext'
 import {
+  getDesktopApi,
   loadWidgetView,
   type CalendarWidgetView,
 } from '../lib/platform'
 import { toDateKey } from '../types'
 
 /**
- * Electron 배경 고정 창 · 위젯 미리보기용 — 캘린더만 표시.
+ * Electron 배경 고정 창 — 캘린더만 표시.
  * 창은 OS에서 movable:false 로 고정되어 드래그로 이동하지 않음.
  */
 export function DesktopPinPage() {
@@ -38,6 +40,10 @@ export function DesktopPinPage() {
     return api.onDesktopPinView((next) => setView(next))
   }, [])
 
+  const closePin = () => {
+    void getDesktopApi()?.closeDesktopPin()
+  }
+
   const weekAnchor = selectedDate || toDateKey(new Date())
 
   return (
@@ -46,21 +52,32 @@ export function DesktopPinPage() {
         <p className="text-xs font-bold tracking-tight text-slate-800">
           PinTime
         </p>
-        <div className="flex rounded-full bg-slate-100 p-0.5">
-          {(['week', 'month'] as const).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => setView(mode)}
-              className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
-                view === mode
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500'
-              }`}
-            >
-              {mode === 'week' ? '주간' : '월간'}
-            </button>
-          ))}
+        <div className="flex items-center gap-1.5">
+          <div className="flex rounded-full bg-slate-100 p-0.5">
+            {(['week', 'month'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setView(mode)}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${
+                  view === mode
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-500'
+                }`}
+              >
+                {mode === 'week' ? '주간' : '월간'}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={closePin}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            aria-label="배경 달력 닫기"
+            title="닫기"
+          >
+            <X size={14} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
 

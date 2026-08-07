@@ -225,7 +225,7 @@ export function AppSidebar({
 
       <div className="pt-scroll-dark pt-scroll mt-4 min-h-0 flex-1 overflow-auto px-4 pb-4">
         <p className="mb-2 text-[10px] font-bold tracking-[0.14em] text-[var(--sidebar-muted)] uppercase">
-          This week
+          이번 주
         </p>
         <ul className="space-y-2">
           {agenda.weekItems.length === 0 && (
@@ -262,7 +262,7 @@ export function AppSidebar({
         {agenda.trips.length > 0 && (
           <>
             <p className="mt-5 mb-2 text-[10px] font-bold tracking-[0.14em] text-[var(--sidebar-muted)] uppercase">
-              All-day
+              종일
             </p>
             <ul className="space-y-2">
               {agenda.trips.map((e) => (

@@ -86,6 +86,7 @@ export function EventFormModal({
   const [endHour, setEndHour] = useState(11)
   const [extras, setExtras] = useState<EventExtras>({})
   const inputRef = useRef<HTMLInputElement>(null)
+  const showExtras = !allDay && startDate === endDate
 
   useEffect(() => {
     if (!open) return
@@ -110,6 +111,23 @@ export function EventFormModal({
     initialEndHour,
     initialExtras,
   ])
+
+  // 종일·여러 날이면 반복/장소 등 extras 제거 (조용한 소실 방지)
+  useEffect(() => {
+    if (!open || showExtras) return
+    setExtras((prev) => {
+      if (
+        !prev.repeat &&
+        !prev.repeatUntil &&
+        !prev.location &&
+        !prev.link &&
+        !prev.memo
+      ) {
+        return prev
+      }
+      return {}
+    })
+  }, [open, showExtras])
 
   const canSubmit = useMemo(() => {
     if (!title.trim()) return false
@@ -137,11 +155,9 @@ export function EventFormModal({
       endDate: nextEnd,
       startHour,
       endHour: nextEndHour,
-      extras,
+      extras: showExtras ? extras : {},
     })
   }
-
-  const showExtras = !allDay && startDate === endDate
 
   const endHourOptions =
     startDate === endDate
@@ -283,12 +299,17 @@ export function EventFormModal({
           <ColorPicker value={color} onChange={setColor} />
         </div>
 
-        {showExtras && (
+        {showExtras ? (
           <EventExtrasBar
             value={extras}
             onChange={setExtras}
             repeatAnchorDate={startDate}
           />
+        ) : (
+          <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
+            종일·여러 날 일정에는 반복·장소·링크·메모를 쓸 수 없어요. 하루
+            시간 일정으로 바꾸면 다시 나타납니다.
+          </p>
         )}
 
         <div className="mt-4 flex items-center justify-between gap-2">

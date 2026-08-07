@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, ChevronLeft } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 export const REPEAT_OPTIONS = [
@@ -33,7 +33,8 @@ function normalizeRepeat(value?: string): string {
     (o) => o.value === value || o.label === value,
   )
   if (preset) return preset.value
-  return 'custom'
+  // 예전 사용자화 문자열 → 표시만 none 취급 (펼치지 않음)
+  return 'none'
 }
 
 export function repeatLabel(value?: string, until?: string): string {
@@ -42,19 +43,18 @@ export function repeatLabel(value?: string, until?: string): string {
     (o) => o.value === value || o.label === value,
   )
   const base = preset ? preset.label : value
+  if (!preset) return '반복'
   if (!until) return base
   const m = until.match(/^(\d{4})-(\d{2})-(\d{2})$/)
   if (!m) return `${base} · ~${until}`
   return `${base} · ~${Number(m[2])}/${Number(m[3])}`
 }
 
-function labelOf(normalized: string, customText: string): string {
-  if (normalized === 'none') return ''
-  if (normalized === 'custom') return customText.trim()
-  const preset = REPEAT_OPTIONS.find((o) => o.value === normalized)
-  return preset?.label ?? ''
-}
-
+/**
+ * 반복 선택:
+ * - 안 함 / 매일~매년 원탭 → 기한 없음으로 바로 적용
+ * - 「기간 정하기」로 종료일 지정 후 적용
+ */
 export function RepeatPickerModal({
   open,
   value,
@@ -64,56 +64,48 @@ export function RepeatPickerModal({
   onSelect,
 }: RepeatPickerModalProps) {
   const [selected, setSelected] = useState('none')
-  const [customOpen, setCustomOpen] = useState(false)
-  const [customText, setCustomText] = useState('')
-  const [untilMode, setUntilMode] = useState<'forever' | 'date'>('forever')
+  const [untilOpen, setUntilOpen] = useState(false)
   const [untilDate, setUntilDate] = useState('')
 
   useEffect(() => {
     if (!open) return
     const n = normalizeRepeat(value)
-    setSelected(n)
-    if (n === 'custom') {
-      setCustomText(
-        value &&
-          !REPEAT_OPTIONS.some((o) => o.value === value || o.label === value)
-          ? value
-          : '',
-      )
-      setCustomOpen(false)
-    } else {
-      setCustomText('')
-      setCustomOpen(false)
-    }
-    if (until) {
-      setUntilMode('date')
-      setUntilDate(until)
-    } else {
-      setUntilMode('forever')
-      setUntilDate(minUntil ?? '')
-    }
+    setSelected(n === 'none' && value && value !== '안 함' && value !== 'none' ? 'none' : n)
+    setUntilDate(until || minUntil || '')
+    setUntilOpen(Boolean(until))
   }, [open, value, until, minUntil])
 
   if (!open) return null
 
-  const apply = (normalized: string, custom?: string) => {
-    const repeat = labelOf(normalized, custom ?? customText)
-    if (!repeat) {
+  const applyPreset = (optValue: string, optLabel: string) => {
+    if (optValue === 'none') {
       onSelect({ repeat: '', until: undefined })
       onClose()
       return
     }
-    const nextUntil =
-      untilMode === 'date' && untilDate.trim() ? untilDate.trim() : undefined
-    if (nextUntil && minUntil && nextUntil < minUntil) {
-      window.alert('반복 종료일은 시작일 이후여야 합니다.')
-      return
-    }
-    onSelect({ repeat, until: nextUntil })
+    onSelect({ repeat: optLabel, until: undefined })
     onClose()
   }
 
-  const showUntil = selected !== 'none' && !customOpen
+  const applyWithUntil = () => {
+    if (selected === 'none') {
+      onSelect({ repeat: '', until: undefined })
+      onClose()
+      return
+    }
+    const preset = REPEAT_OPTIONS.find((o) => o.value === selected)
+    if (!preset || preset.value === 'none') return
+    if (!untilDate.trim()) {
+      window.alert('종료일을 선택해 주세요.')
+      return
+    }
+    if (minUntil && untilDate < minUntil) {
+      window.alert('반복 종료일은 시작일 이후여야 합니다.')
+      return
+    }
+    onSelect({ repeat: preset.label, until: untilDate.trim() })
+    onClose()
+  }
 
   return (
     <div
@@ -128,7 +120,7 @@ export function RepeatPickerModal({
           <button
             type="button"
             onClick={() => {
-              if (customOpen) setCustomOpen(false)
+              if (untilOpen) setUntilOpen(false)
               else onClose()
             }}
             className="absolute left-3 rounded-lg p-1 text-slate-600 hover:bg-black/5"
@@ -137,12 +129,12 @@ export function RepeatPickerModal({
             <ChevronLeft size={22} />
           </button>
           <h2 className="text-[17px] font-semibold text-slate-900">
-            {customOpen ? '사용자화' : '반복'}
+            {untilOpen ? '반복 기간' : '반복'}
           </h2>
         </div>
 
         <div className="max-h-[70vh] overflow-auto px-4 py-4">
-          {!customOpen ? (
+          {!untilOpen ? (
             <>
               <ul className="overflow-hidden rounded-2xl bg-white">
                 {REPEAT_OPTIONS.map((opt, i) => {
@@ -151,14 +143,7 @@ export function RepeatPickerModal({
                     <li key={opt.value}>
                       <button
                         type="button"
-                        onClick={() => {
-                          if (opt.value === 'none') {
-                            onSelect({ repeat: '', until: undefined })
-                            onClose()
-                            return
-                          }
-                          setSelected(opt.value)
-                        }}
+                        onClick={() => applyPreset(opt.value, opt.label)}
                         className={`flex w-full items-center justify-between px-4 py-3.5 text-left text-[16px] text-slate-900 ${
                           i > 0 ? 'border-t border-slate-100' : ''
                         }`}
@@ -180,105 +165,67 @@ export function RepeatPickerModal({
               <button
                 type="button"
                 onClick={() => {
-                  setSelected('custom')
-                  setCustomOpen(true)
+                  if (selected === 'none') setSelected('weekly')
+                  setUntilOpen(true)
+                  if (!untilDate && minUntil) setUntilDate(minUntil)
                 }}
-                className="mt-3 flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3.5 text-[16px] text-slate-900"
+                className="mt-3 w-full rounded-2xl bg-white px-4 py-3.5 text-left text-[15px] font-medium text-slate-800"
               >
-                <span>사용자화</span>
-                <ChevronRight size={18} className="text-slate-300" />
+                기간 정하기 (종료일)
+                <span className="mt-0.5 block text-[12px] font-normal text-slate-400">
+                  매주 등 + 이 날까지만 반복
+                </span>
               </button>
-
-              {showUntil && (
-                <div className="mt-3 overflow-hidden rounded-2xl bg-white">
-                  <p className="border-b border-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-500">
-                    반복 기간 (이 날까지만)
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setUntilMode('forever')}
-                    className="flex w-full items-center justify-between px-4 py-3.5 text-left text-[15px] text-slate-900"
-                  >
-                    <span>기한 없음</span>
-                    {untilMode === 'forever' && (
-                      <Check
-                        size={18}
-                        className="text-emerald-500"
-                        strokeWidth={2.5}
-                      />
-                    )}
-                  </button>
-                  <div className="border-t border-slate-100 px-4 py-3">
-                    <button
-                      type="button"
-                      onClick={() => setUntilMode('date')}
-                      className="flex w-full items-center justify-between text-left text-[15px] text-slate-900"
-                    >
-                      <span>종료일 지정</span>
-                      {untilMode === 'date' && (
-                        <Check
-                          size={18}
-                          className="text-emerald-500"
-                          strokeWidth={2.5}
-                        />
-                      )}
-                    </button>
-                    {untilMode === 'date' && (
-                      <input
-                        type="date"
-                        value={untilDate}
-                        min={minUntil}
-                        onChange={(e) => setUntilDate(e.target.value)}
-                        className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
-                      />
-                    )}
-                  </div>
-                  <div className="border-t border-slate-100 p-3">
-                    <button
-                      type="button"
-                      disabled={
-                        untilMode === 'date' && !untilDate.trim()
-                      }
-                      onClick={() => apply(selected)}
-                      className="w-full rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
-                    >
-                      적용
-                    </button>
-                  </div>
-                </div>
-              )}
             </>
           ) : (
-            <div className="rounded-2xl bg-white p-4">
-              <p className="text-xs font-medium text-slate-500">반복 규칙</p>
-              <input
-                autoFocus
-                value={customText}
-                onChange={(e) => setCustomText(e.target.value)}
-                placeholder="예: 2주마다 월·수"
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
-              />
-              <p className="mt-3 text-xs font-medium text-slate-500">
-                반복 종료일 (선택)
-              </p>
-              <input
-                type="date"
-                value={untilDate}
-                min={minUntil}
-                onChange={(e) => {
-                  setUntilMode(e.target.value ? 'date' : 'forever')
-                  setUntilDate(e.target.value)
-                }}
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
-              />
-              <button
-                type="button"
-                disabled={!customText.trim()}
-                onClick={() => apply('custom')}
-                className="mt-3 w-full rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                적용
-              </button>
+            <div className="space-y-3">
+              <ul className="overflow-hidden rounded-2xl bg-white">
+                {REPEAT_OPTIONS.filter((o) => o.value !== 'none').map(
+                  (opt, i) => {
+                    const on = selected === opt.value
+                    return (
+                      <li key={opt.value}>
+                        <button
+                          type="button"
+                          onClick={() => setSelected(opt.value)}
+                          className={`flex w-full items-center justify-between px-4 py-3.5 text-left text-[16px] text-slate-900 ${
+                            i > 0 ? 'border-t border-slate-100' : ''
+                          }`}
+                        >
+                          <span>{opt.label}</span>
+                          {on && (
+                            <Check
+                              size={20}
+                              className="text-emerald-500"
+                              strokeWidth={2.5}
+                            />
+                          )}
+                        </button>
+                      </li>
+                    )
+                  },
+                )}
+              </ul>
+              <div className="rounded-2xl bg-white p-4">
+                <p className="text-xs font-medium text-slate-500">
+                  이 날까지만 반복
+                </p>
+                <input
+                  type="date"
+                  value={untilDate}
+                  min={minUntil}
+                  onChange={(e) => setUntilDate(e.target.value)}
+                  className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-400 focus:bg-white focus:ring-2 focus:ring-emerald-100"
+                />
+                <button
+                  type="button"
+                  disabled={!untilDate.trim() || selected === 'none'}
+                  onClick={applyWithUntil}
+                  className="mt-3 w-full rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-40"
+                >
+                  적용
+                </button>
+              </div>
             </div>
           )}
         </div>

@@ -299,7 +299,7 @@ export function AgentPage() {
                 </button>
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200">
                   <ImagePlus size={14} />
-                  캡처 업로드
+                  데모용 캡처
                   <input
                     type="file"
                     accept="image/*"
@@ -310,14 +310,14 @@ export function AgentPage() {
                       setCaptureName(file.name)
                       if (!chat.trim()) setChat(DEMO_CHAT)
                       showToast(
-                        '캡처를 첨부했어요. 데모에서는 텍스트로 분석을 이어갑니다',
+                        '실제 OCR은 없어요. 데모 문장으로 분석을 이어갑니다',
                       )
                     }}
                   />
                 </label>
                 {captureName && (
-                  <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">
-                    첨부: {captureName}
+                  <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
+                    데모 첨부: {captureName} · OCR 없음
                   </span>
                 )}
               </div>
