@@ -1,9 +1,10 @@
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signInWithPopup,
+  signInWithRedirect,
   signOut as firebaseSignOut,
   updateProfile,
   type User,
@@ -48,6 +49,10 @@ export function firebaseAuthErrorMessage(err: unknown): string {
     typeof (err as { code: unknown }).code === 'string'
       ? (err as { code: string }).code
       : ''
+  const msg = err instanceof Error ? err.message : String(err ?? '')
+  if (/Database is closing|closing\/hidden|IDBDatabase/i.test(msg)) {
+    return '구글 로그인 창 때문에 잠시 끊겼어요. 다시 한 번 눌러 주세요.'
+  }
   switch (code) {
     case 'auth/email-already-in-use':
       return '이미 가입된 이메일이에요. 로그인 해 보세요.'
@@ -64,9 +69,9 @@ export function firebaseAuthErrorMessage(err: unknown): string {
     case 'auth/popup-closed-by-user':
       return '구글 로그인 창이 닫혔어요.'
     case 'auth/operation-not-allowed':
-      return 'Firebase 콘솔에서 이메일/비밀번호 로그인을 켜 주세요.'
+      return '이메일 가입 또는 Google 로그인이 아직 켜지지 않았어요.'
     case 'auth/unauthorized-domain':
-      return '이 도메인이 Firebase 승인된 도메인에 없어요.'
+      return '이 주소는 아직 허용되지 않았어요. localhost로 열어 보세요.'
     default:
       return err instanceof Error ? err.message : '인증에 실패했어요'
   }
@@ -91,6 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     let unsubCloud: (() => void) | undefined
+
+    // Google 리다이렉트 로그인 결과 처리 (팝업 IndexedDB 오류 회피)
+    void getRedirectResult(auth).catch(() => undefined)
 
     const unsubAuth = onAuthStateChanged(auth, (next) => {
       setUser(next)
@@ -128,21 +136,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInGoogle = useCallback(async () => {
     const auth = getFirebaseAuth()
-    if (!auth) throw new Error('Firebase가 설정되지 않았어요')
+    if (!auth) throw new Error('계정 서버가 연결되지 않았어요')
     const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
+    // 팝업은 포커스 이동 시 IndexedDB "Database is closing/hidden"이 날 수 있어 리다이렉트 사용
+    await signInWithRedirect(auth, provider)
   }, [])
 
   const signInEmail = useCallback(async (email: string, password: string) => {
     const auth = getFirebaseAuth()
-    if (!auth) throw new Error('Firebase가 설정되지 않았어요')
+    if (!auth) throw new Error('계정 서버가 연결되지 않았어요')
     await signInWithEmailAndPassword(auth, email.trim(), password)
   }, [])
 
   const signUpEmail = useCallback(
     async (email: string, password: string, displayName?: string) => {
       const auth = getFirebaseAuth()
-      if (!auth) throw new Error('Firebase가 설정되지 않았어요')
+      if (!auth) throw new Error('계정 서버가 연결되지 않았어요')
 
       const cred = await createUserWithEmailAndPassword(
         auth,
@@ -157,14 +166,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await cred.user.reload()
       }
 
-      // Auth 계정 생성 직후 Firestore 프로필 문서 저장
       await pushProfile(cred.user.uid, {
         displayName: name || cred.user.displayName || '',
         email: cred.user.email,
         createdAt: Date.now(),
       })
 
-      // onAuthStateChanged가 이미 돌았을 수 있어 표시 이름 갱신
       setUser(auth.currentUser)
     },
     [],
