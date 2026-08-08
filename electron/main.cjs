@@ -117,7 +117,20 @@ function savePinBounds(bounds) {
   }
 }
 
+function appIconPath() {
+  // 개발: build-resources · 패키징: Resources/icon.* (electron-builder)
+  const candidates = [
+    path.join(__dirname, '..', 'build-resources', 'icon.png'),
+    path.join(process.resourcesPath || '', 'icon.png'),
+  ]
+  for (const p of candidates) {
+    if (p && fs.existsSync(p)) return p
+  }
+  return undefined
+}
+
 function createMainWindow() {
+  const icon = appIconPath()
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -125,6 +138,7 @@ function createMainWindow() {
     minHeight: 600,
     title: 'PinTime',
     backgroundColor: '#e8f6ee',
+    ...(icon ? { icon } : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -146,6 +160,7 @@ function createPinWindow() {
   }
 
   const bounds = loadPinBounds()
+  const icon = appIconPath()
   pinWindow = new BrowserWindow({
     ...bounds,
     minWidth: 320,
@@ -164,6 +179,7 @@ function createPinWindow() {
     fullscreenable: false,
     focusable: true,
     roundedCorners: true,
+    ...(icon ? { icon } : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
