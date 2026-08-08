@@ -226,7 +226,8 @@ export function MyPage() {
             </h2>
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
-            데스크톱에 달력을 고정해 둡니다. 창을 드래그해도 움직이지 않습니다.
+            데스크톱에 달력 창을 띄웁니다. 드래그로 옮기고, 다른 앱 뒤로 둘 수
+            있어요.
           </p>
 
           {electron ? (

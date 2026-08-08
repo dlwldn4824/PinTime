@@ -201,11 +201,19 @@ select {
   opacity: 0.95;
 }
 
-/* Electron 배경 고정 창 — 투명 셸 */
+/* Electron 데스크톱 달력 창 */
 html.pt-desktop-pin,
 body.pt-desktop-pin,
 body.pt-desktop-pin #root {
-  background: transparent !important;
   overflow: hidden;
+  height: 100%;
+}
+
+.pt-pin-drag {
+  -webkit-app-region: drag;
+}
+
+.pt-pin-no-drag {
+  -webkit-app-region: no-drag;
 }
 

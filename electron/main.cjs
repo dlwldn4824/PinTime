@@ -148,17 +148,19 @@ function createPinWindow() {
   const bounds = loadPinBounds()
   pinWindow = new BrowserWindow({
     ...bounds,
+    minWidth: 320,
+    minHeight: 360,
     title: 'PinTime Desktop Calendar',
     frame: false,
-    transparent: true,
-    backgroundColor: '#00000000',
+    transparent: false,
+    backgroundColor: '#e8f6ee',
     hasShadow: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    resizable: false,
-    movable: false,
+    alwaysOnTop: false,
+    skipTaskbar: false,
+    resizable: true,
+    movable: true,
     maximizable: false,
-    minimizable: false,
+    minimizable: true,
     fullscreenable: false,
     focusable: true,
     roundedCorners: true,
@@ -170,10 +172,17 @@ function createPinWindow() {
     },
   })
 
-  // 드래그로 움직이지 않음 · 위치 고정 (배경화면처럼)
-  pinWindow.setMovable(false)
-  pinWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
-  pinWindow.setAlwaysOnTop(true, 'floating')
+  // 드래그로 위치·크기 조절 가능 · 다른 앱 위에 고정하지 않음
+  pinWindow.setMovable(true)
+  pinWindow.setVisibleOnAllWorkspaces(false)
+
+  const persistBounds = () => {
+    if (pinWindow && !pinWindow.isDestroyed()) {
+      savePinBounds(pinWindow.getBounds())
+    }
+  }
+  pinWindow.on('moved', persistBounds)
+  pinWindow.on('resized', persistBounds)
 
   pinWindow.loadURL(`${appOrigin}/?mode=desktop-pin`)
   pinWindow.on('closed', () => {
