@@ -1,7 +1,7 @@
 {
   "name": "pintime",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "PinTime — AI schedule agent calendar",
   "author": "PinTime",
   "type": "module",
@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite --port 5173 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "electron:build": "npm run build && electron-builder --win --x64",
-    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:mac": "npm run build && electron-builder --mac --universal",
     "electron:dir": "npm run build && electron-builder --dir"
   },
   "dependencies": {
@@ -81,10 +81,20 @@
     },
     "mac": {
       "target": [
-        "dmg"
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
       ],
       "category": "public.app-category.productivity",
-      "artifactName": "PinTime-${version}.${ext}"
+      "artifactName": "PinTime-${version}-mac.${ext}",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "PinTime ${version}"
     },
     "portable": {
       "artifactName": "PinTime-Portable-${version}.exe"

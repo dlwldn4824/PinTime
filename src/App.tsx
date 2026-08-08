@@ -4,7 +4,6 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { AnalyticsRouteTracker } from './components/AnalyticsRouteTracker'
 import { AppSidebar } from './components/AppSidebar'
 import { BottomNav } from './components/BottomNav'
-import { MainNav } from './components/MainNav'
 import { CalendarProvider } from './context/CalendarContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { isDesktopPinMode, shouldRenderDesktopPin } from './lib/platform'
@@ -56,7 +55,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* 사이드바 닫힘 · 데스크탑: 가운데 네비 3버튼 */}
+        {/* 사이드바 닫힘 · 데스크탑: 열기 버튼만 (네비는 폰과 같은 하단바) */}
         {!sidebarOpen && (
           <header className="relative z-30 hidden shrink-0 items-center border-b border-[var(--line)] bg-white/90 px-4 py-2.5 backdrop-blur-md lg:flex">
             <button
@@ -69,16 +68,12 @@ function Shell({ children }: { children: React.ReactNode }) {
               <PanelLeft size={15} />
               사이드바
             </button>
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="pointer-events-auto">
-                <MainNav variant="floating" className="w-[min(420px,92vw)]" />
-              </div>
-            </div>
           </header>
         )}
 
         <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
-        <div className="lg:hidden">
+        {/* 모바일 항상 · lg에서는 사이드바 접었을 때만 */}
+        <div className={sidebarOpen ? 'lg:hidden' : undefined}>
           <BottomNav />
         </div>
       </div>

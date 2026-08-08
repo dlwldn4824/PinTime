@@ -1,6 +1,6 @@
 import {
   Check,
-  Download,
+  ChartColumn,
   Monitor,
   Palette,
   Smartphone,
@@ -11,20 +11,14 @@ import { useEffect, useState } from 'react'
 import { useCalendar } from '../context/CalendarContext'
 import { useTheme, type AppTheme } from '../context/ThemeContext'
 import {
-  clearAnalyticsDebug,
   loadAnalyticsConsent,
-  loadAnalyticsDebug,
   saveAnalyticsConsent,
   track,
 } from '../lib/analytics'
 import {
   getDesktopApi,
   isElectronApp,
-  loadWidgetEnabled,
   loadWidgetView,
-  saveWidgetEnabled,
-  saveWidgetView,
-  type CalendarWidgetView,
 } from '../lib/platform'
 
 const themes: Array<{
@@ -58,12 +52,7 @@ export function MyPage() {
   const electron = isElectronApp()
   const [pinOpen, setPinOpen] = useState(false)
   const [clearedMsg, setClearedMsg] = useState<string | null>(null)
-  const [widgetView, setWidgetView] = useState<CalendarWidgetView>(() =>
-    loadWidgetView(),
-  )
-  const [widgetEnabled, setWidgetEnabled] = useState(() => loadWidgetEnabled())
   const [analyticsOn, setAnalyticsOn] = useState(() => loadAnalyticsConsent())
-  const [debugEvents, setDebugEvents] = useState(() => loadAnalyticsDebug())
   const [installEvt, setInstallEvt] =
     useState<BeforeInstallPromptEvent | null>(null)
   const [installed, setInstalled] = useState(false)
@@ -100,21 +89,7 @@ export function MyPage() {
     if (!api) return
     const open = await api.toggleDesktopPin()
     setPinOpen(open)
-    if (open) await api.setDesktopPinView(widgetView)
-  }
-
-  const toggleWidget = (on: boolean) => {
-    setWidgetEnabled(on)
-    saveWidgetEnabled(on)
-    void import('../lib/widgetBridge').then((m) => m.syncWidgetBridge())
-  }
-
-  const changeWidgetView = async (view: CalendarWidgetView) => {
-    setWidgetView(view)
-    saveWidgetView(view)
-    void import('../lib/widgetBridge').then((m) => m.syncWidgetBridge())
-    const api = getDesktopApi()
-    if (api && pinOpen) await api.setDesktopPinView(view)
+    if (open) await api.setDesktopPinView(loadWidgetView())
   }
 
   const installPwa = async () => {
@@ -134,7 +109,7 @@ export function MyPage() {
           <div className="min-w-0">
             <h1 className="text-lg font-bold text-[var(--ink)]">마이페이지</h1>
             <p className="text-xs text-[var(--muted)]">
-              프로필 · 테마 · 로컬 앱
+              테마 · 앱 설정
             </p>
           </div>
         </header>
@@ -193,18 +168,15 @@ export function MyPage() {
           </div>
         </section>
 
-        {/* 웹 사용 통계 · 앱 다운로드 수 */}
         {!electron && (
           <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <Download size={16} className="text-[var(--tomato)]" />
-              <h2 className="text-sm font-bold text-[var(--ink)]">
-                사용 통계 · 다운로드
-              </h2>
+              <ChartColumn size={16} className="text-[var(--tomato)]" />
+              <h2 className="text-sm font-bold text-[var(--ink)]">사용 통계</h2>
             </div>
             <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
-              웹만 해당합니다. 일정·할일·공유 내용은 보내지 않고, 화면/기능
-              이름 같은 익명 이벤트만 보냅니다. 기본은 꺼져 있어요.
+              일정·할일 내용은 보내지 않고, 화면 이름만 익명으로 보냅니다.
+              기본은 꺼져 있어요.
             </p>
 
             <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--bg)]/60 px-3.5 py-3">
@@ -213,7 +185,7 @@ export function MyPage() {
                   익명 사용 통계 허용
                 </p>
                 <p className="text-[11px] text-[var(--muted)]">
-                  경로·이벤트명만 · Electron 앱에서는 수집 안 함
+                  일정 내용은 보내지 않아요
                 </p>
               </div>
               <button
@@ -226,7 +198,6 @@ export function MyPage() {
                     saveAnalyticsConsent(true)
                     setAnalyticsOn(true)
                     track('analytics_opt_in')
-                    setDebugEvents(loadAnalyticsDebug())
                   } else {
                     track('analytics_opt_out')
                     saveAnalyticsConsent(false)
@@ -244,56 +215,9 @@ export function MyPage() {
                 />
               </button>
             </div>
-
-            <div className="mt-3 rounded-xl bg-[var(--bg)] px-3.5 py-3 text-[11px] leading-relaxed text-[var(--muted)]">
-              <p className="font-semibold text-[var(--ink)]">
-                노트북 앱 다운로드 수
-              </p>
-              <p className="mt-1">
-                `.exe` 다운로드 횟수는 GitHub Releases 자산에 표시됩니다. 앱
-                안에서는 별도 로그를 보내지 않습니다.
-              </p>
-              <a
-                className="mt-2 inline-block font-semibold text-[var(--tomato)] underline-offset-2 hover:underline"
-                href="https://github.com/dlwldn4824/PinTime/releases"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Releases에서 확인 →
-              </a>
-            </div>
-
-            {analyticsOn && debugEvents.length > 0 && (
-              <div className="mt-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-semibold text-[var(--muted)]">
-                    이 기기 최근 이벤트 (디버그)
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      clearAnalyticsDebug()
-                      setDebugEvents([])
-                    }}
-                    className="text-[10px] font-semibold text-slate-400 hover:text-slate-600"
-                  >
-                    비우기
-                  </button>
-                </div>
-                <ul className="mt-1.5 max-h-28 overflow-auto rounded-xl bg-slate-50 px-2.5 py-2 font-mono text-[10px] text-slate-600">
-                  {debugEvents.slice(0, 8).map((e, i) => (
-                    <li key={`${e.t}-${i}`}>
-                      {e.name}
-                      {e.props?.path ? ` ${String(e.props.path)}` : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </section>
         )}
 
-        {/* 노트북 — 배경 고정 달력 */}
         <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2">
             <Monitor size={16} className="text-[var(--tomato)]" />
@@ -303,7 +227,6 @@ export function MyPage() {
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
             데스크톱에 달력을 고정해 둡니다. 창을 드래그해도 움직이지 않습니다.
-            GitHub Releases의 Windows 설치 파일(.exe)로 실행하세요.
           </p>
 
           {electron ? (
@@ -320,97 +243,35 @@ export function MyPage() {
             </button>
           ) : (
             <div className="mt-4 rounded-xl bg-[var(--bg)] px-3.5 py-3 text-[11px] leading-relaxed text-[var(--muted)]">
-              지금 브라우저입니다. 노트북 앱은{' '}
+              노트북 앱(Windows · macOS)은{' '}
               <a
                 className="font-semibold text-[var(--tomato)] underline-offset-2 hover:underline"
                 href="https://github.com/dlwldn4824/PinTime/releases"
                 target="_blank"
                 rel="noreferrer"
               >
-                GitHub Releases
+                여기에서 받기
               </a>
-              에서 받으세요.
             </div>
           )}
         </section>
 
-        {/* 휴대폰 — 위젯 · 홈 화면 */}
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Smartphone size={16} className="text-[var(--tomato)]" />
-            <h2 className="text-sm font-bold text-[var(--ink)]">
-              휴대폰 · 위젯 설정
-            </h2>
-          </div>
-          <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
-            지금은 설정만 기기에 저장합니다. 홈 화면 OS 위젯 연동은 준비
-            중이에요. PWA로 앱을 설치한 뒤, 나중에 쓸 주간/월간 선호를 골라
-            두세요.
-          </p>
-
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] bg-[var(--bg)]/60 px-3.5 py-3">
-            <div>
-              <p className="text-sm font-semibold text-[var(--ink)]">
-                위젯 설정 저장
-              </p>
-              <p className="text-[11px] text-[var(--muted)]">
-                홈 위젯을 바로 만들지 않습니다
-              </p>
+        {!electron && (
+          <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Smartphone size={16} className="text-[var(--tomato)]" />
+              <h2 className="text-sm font-bold text-[var(--ink)]">
+                휴대폰 · 홈 화면
+              </h2>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={widgetEnabled}
-              onClick={() => toggleWidget(!widgetEnabled)}
-              className={`relative h-7 w-12 rounded-full transition ${
-                widgetEnabled ? 'bg-[var(--tomato)]' : 'bg-slate-200'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
-                  widgetEnabled ? 'translate-x-5' : ''
-                }`}
-              />
-            </button>
-          </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+              홈 화면에 추가해 앱처럼 쓸 수 있어요.
+            </p>
 
-          <p className="mt-3 text-[11px] font-semibold text-[var(--muted)]">
-            선호 달력 종류 (연동 예정)
-          </p>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            {(
-              [
-                { id: 'week', label: '주간 (일력)', desc: '타임테이블형' },
-                { id: 'month', label: '월간 (달력)', desc: '한 달 그리드' },
-              ] as const
-            ).map((opt) => {
-              const active = widgetView === opt.id
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  disabled={!widgetEnabled}
-                  onClick={() => void changeWidgetView(opt.id)}
-                  className={`rounded-xl border px-3 py-3 text-left transition disabled:opacity-40 ${
-                    active
-                      ? 'border-[var(--tomato)] bg-[var(--tomato-soft)]/50'
-                      : 'border-[var(--line)] bg-white'
-                  }`}
-                >
-                  <p className="text-sm font-bold text-[var(--ink)]">
-                    {opt.label}
-                  </p>
-                  <p className="text-[10px] text-[var(--muted)]">{opt.desc}</p>
-                </button>
-              )
-            })}
-          </div>
-
-          {!electron && (
             <div className="mt-4 space-y-2">
               {installed ? (
                 <p className="rounded-xl bg-[var(--main-soft)] px-3.5 py-2.5 text-[11px] font-semibold text-[var(--pin-text)]">
-                  홈 화면에 설치되어 있습니다 (PWA)
+                  홈 화면에 설치되어 있습니다
                 </p>
               ) : installEvt ? (
                 <button
@@ -422,14 +283,12 @@ export function MyPage() {
                 </button>
               ) : (
                 <p className="rounded-xl bg-[var(--bg)] px-3.5 py-2.5 text-[11px] leading-relaxed text-[var(--muted)]">
-                  Safari/Chrome 공유 → <strong>홈 화면에 추가</strong>로 설치할
-                  수 있습니다. Android Chrome에서는 설치 버튼이 나타날 수
-                  있습니다.
+                  브라우저 메뉴에서 <strong>홈 화면에 추가</strong>를 선택하세요.
                 </p>
               )}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         <section className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-4 shadow-sm">
           <div className="flex items-center gap-2">
@@ -469,10 +328,6 @@ export function MyPage() {
             </p>
           )}
         </section>
-
-        <p className="text-center text-[11px] text-[var(--muted)]">
-          PinTime · 로컬 앱 프로토타입
-        </p>
       </div>
     </div>
   )
