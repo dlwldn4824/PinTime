@@ -32,8 +32,18 @@ npm run build && npm run preview
 | 노트북 | Electron 앱 + **배경 고정 달력** (Windows · macOS) | 자동 업데이트 · 트레이 · Apple 공증 |
 | 휴대폰 | PWA 홈 화면 설치 | Capacitor + OS 홈 위젯 (Android/iOS) |
 
-태그 `v*` 를 push 하면 GitHub Actions가 Windows `.exe`와 macOS `.dmg`를 Release에 올립니다.  
-macOS는 개발자 서명·공증 전이라, 처음 열 때 **우클릭 → 열기**가 필요할 수 있습니다.
+태그 `v*` 를 push 하면 GitHub Actions가 Windows `.exe`와 macOS `.dmg`를 Release에 올립니다.
+
+### macOS 처음 열기 (Gatekeeper)
+
+Apple 개발자 서명·공증 전이라, 처음 실행 시 *“‘PinTime’을(를) 열지 않음”* 이 뜰 수 있습니다. **완료**만 누르지 말고 아래로 허용하세요.
+
+1. **우클릭으로 열기**  
+   Applications에서 PinTime을 **우클릭(Control+클릭) → 열기** → 다시 뜨면 **열기**
+2. **시스템 설정에서 허용** (위가 안 될 때)  
+   **시스템 설정 → 개인정보 보호 및 보안** → 아래로 스크롤 → PinTime 차단 안내에서 **그래도 열기**
+
+한 번만 허용하면 다음부터는 그냥 열립니다.
 
 ### 사용 통계 · 다운로드
 
