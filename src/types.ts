@@ -25,7 +25,7 @@ export type Schedule = {
   location?: string
   link?: string
   memo?: string
-  /** 전날 알림 (에이전트 확정 등) */
+  /** 전날 알림 */
   remind?: boolean
 }
 

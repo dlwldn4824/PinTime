@@ -1,5 +1,6 @@
 import type { AllDayEvent, Schedule, ShareRoom } from '../types'
 import { createId, normalizeRoom } from '../types'
+import { getPublicWebOrigin } from './publicUrl'
 import {
   decodeRoomAsync,
   decodeRoomSync,
@@ -37,6 +38,10 @@ export function loadCalendar(): CalendarState | null {
 
 export function saveCalendar(state: CalendarState) {
   localStorage.setItem(CAL_KEY, JSON.stringify(state))
+  void import('./cloudSync').then((m) => {
+    if (m.isApplyingRemoteCalendar()) return
+    m.schedulePushCalendar(state)
+  })
 }
 
 export function loadRoom(id: string): ShareRoom | null {
@@ -62,7 +67,22 @@ export function loadMyName(): string {
 }
 
 export function saveMyName(name: string) {
-  localStorage.setItem(MY_NAME_KEY, name)
+  const trimmed = name.trim()
+  if (!trimmed) {
+    localStorage.removeItem(MY_NAME_KEY)
+    return
+  }
+  localStorage.setItem(MY_NAME_KEY, trimmed)
+}
+
+/** 표시 이름 입력 placeholder — 마이페이지 저장 이름 우선, 없으면 임의 예시 */
+const EXAMPLE_NAMES = ['민수', '하늘', '서연', '도윤', '하은'] as const
+
+export function nameExamplePlaceholder(): string {
+  const saved = loadMyName().trim()
+  if (saved) return `예: ${saved}`
+  const i = Math.floor(Math.random() * EXAMPLE_NAMES.length)
+  return `예: ${EXAMPLE_NAMES[i]}`
 }
 
 export function loadUserId(): string {
@@ -148,31 +168,42 @@ export type ShareLinkOptions = {
   guest?: boolean
 }
 
-/** 동기 공유 링크 (압축 없음). 호스트 재진입 등 */
+/** 공유 경로 — 짧은 `/j/:id` (레거시 `/join/:id` 도 열림) */
+const SHARE_PATH = '/j'
+
+function roomTitleParam(title: string): string {
+  const t = title.trim() || '일정 조율'
+  // 카톡 OG용 · URL이 너무 길어지지 않게 제한
+  return t.length > 40 ? `${t.slice(0, 39)}…` : t
+}
+
+/** 동기 공유 링크 (압축 없음). 호스트 재진입 등 — 항상 배포 도메인 */
 export function buildShareUrl(
   room: ShareRoom,
   opts?: ShareLinkOptions,
 ): string {
-  const url = new URL(`${window.location.origin}/join/${room.id}`)
+  const url = new URL(`${getPublicWebOrigin()}${SHARE_PATH}/${room.id}`)
   url.searchParams.set(
     'd',
     encodeRoomData(room, {
       includeParticipants: opts?.includeParticipants ?? false,
     }),
   )
-  if (opts?.guest) url.searchParams.set('guest', '1')
+  if (opts?.guest) url.searchParams.set('g', '1')
+  url.searchParams.set('n', roomTitleParam(room.title))
   return url.toString()
 }
 
 /**
- * 친구 초대: 현재 참가자 가능시간 포함(압축, 비밀번호 제외).
- * 친구가 열면 호스트와 겹치는 시간을 바로 볼 수 있음.
+ * 친구 초대: 방 설정만 압축(짧음) + g=1.
+ * 가능시간은 친구가 등록 후 「호스트에게 전달」 sync 링크로 넘김.
  */
 export async function buildInviteUrl(room: ShareRoom): Promise<string> {
-  const url = new URL(`${window.location.origin}/join/${room.id}`)
-  const encoded = await encodeRoomAsync(room, { includeParticipants: true })
+  const url = new URL(`${getPublicWebOrigin()}${SHARE_PATH}/${room.id}`)
+  const encoded = await encodeRoomAsync(room, { includeParticipants: false })
   url.searchParams.set('d', encoded)
-  url.searchParams.set('guest', '1')
+  url.searchParams.set('g', '1')
+  url.searchParams.set('n', roomTitleParam(room.title))
   return url.toString()
 }
 
@@ -181,9 +212,10 @@ export async function buildInviteUrl(room: ShareRoom): Promise<string> {
  * 참가자 가능시간만 압축해 넣고, 비밀번호는 넣지 않음.
  */
 export async function buildSyncUrl(room: ShareRoom): Promise<string> {
-  const url = new URL(`${window.location.origin}/join/${room.id}`)
+  const url = new URL(`${getPublicWebOrigin()}${SHARE_PATH}/${room.id}`)
   const encoded = await encodeRoomAsync(room, { includeParticipants: true })
   url.searchParams.set('d', encoded)
-  url.searchParams.set('sync', '1')
+  url.searchParams.set('s', '1')
+  url.searchParams.set('n', roomTitleParam(room.title))
   return url.toString()
 }

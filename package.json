@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "node --experimental-strip-types --test src/lib/seoulTime.test.ts",
     "preview": "vite preview",
     "electron:dev": "concurrently -k \"vite --port 5173 --strictPort\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "electron:build": "npm run build && electron-builder --win --x64",
@@ -17,6 +18,7 @@
     "electron:dir": "npm run build && electron-builder --dir"
   },
   "dependencies": {
+    "firebase": "^12.17.1",
     "lucide-react": "^1.25.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

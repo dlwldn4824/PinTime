@@ -15,6 +15,7 @@ import {
 } from '../lib/todos'
 import { toDateKey } from '../types'
 import { MainNav } from './MainNav'
+import { PinTimeLogo } from './PinTimeLogo'
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
 
@@ -118,7 +119,7 @@ export function AppSidebar({
     } catch {
       /* ignore */
     }
-    navigate('/calendar')
+    navigate('/')
   }
 
   const standingOpen = useMemo(
@@ -149,8 +150,8 @@ export function AppSidebar({
           className="flex min-w-0 flex-1 items-center gap-3 px-2 transition hover:opacity-90"
           aria-label="홈으로 이동"
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--main)] text-sm font-bold text-[var(--pin-text)] shadow-lg shadow-[var(--main)]/30">
-            P
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white shadow-lg shadow-black/20">
+            <PinTimeLogo size={36} className="rounded-xl" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-bold tracking-tight">PinTime</p>

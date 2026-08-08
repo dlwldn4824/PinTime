@@ -2,22 +2,24 @@ import {
   CalendarPlus,
   Check,
   Copy,
+  Download,
+  ExternalLink,
   LogOut,
   Pencil,
   Share2,
-  Smartphone,
   UserPlus,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { AuthModal } from '../components/AuthModal'
 import { AvailabilityEditor } from '../components/AvailabilityEditor'
 import { CommonSlotsList } from '../components/CommonSlotsList'
 import { OverlayGrid } from '../components/OverlayGrid'
 import { Toast } from '../components/Toast'
 import { useCalendar } from '../context/CalendarContext'
 import { useToast } from '../hooks/useToast'
-import { isHandEditedSource } from '../lib/calendarRoomSync'
+import { RELEASES_URL } from '../lib/appUpdate'
+import { isLikelyMobile } from '../lib/platform'
+import { getPublicWebOrigin } from '../lib/publicUrl'
 import {
   confirmRoomSlot,
   findParticipant,
@@ -33,11 +35,10 @@ import {
   loadRoomSession,
   saveRoomSession,
 } from '../lib/session'
-import { loadMyRooms } from '../lib/storage'
+import { loadMyRooms, nameExamplePlaceholder } from '../lib/storage'
 import {
   SLOT_STEP_MIN,
   type ConfirmRange,
-  busyToAvailableSlotsForRoom,
   filterSlotsToRoom,
   formatRoomRangeLabel,
   slotKeyToAppointment,
@@ -61,10 +62,10 @@ export function JoinPage() {
   const [room, setRoom] = useState<ShareRoom | null>(null)
   const [name, setName] = useState('')
   const [password, setPassword] = useState('')
+  const [namePlaceholder] = useState(() => nameExamplePlaceholder())
   const [myId, setMyId] = useState<string | null>(null)
   const [mySlots, setMySlots] = useState<Set<SlotKey>>(new Set())
   const [importText, setImportText] = useState('')
-  const [authOpen, setAuthOpen] = useState(false)
   const [linkCopied, setLinkCopied] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [missing, setMissing] = useState(false)
@@ -76,10 +77,11 @@ export function JoinPage() {
   const [showSyncHint, setShowSyncHint] = useState(false)
   /** 나중에 하기로 접어도 sync 미전달이면 배너 유지 */
   const [syncPending, setSyncPending] = useState(false)
-  /** 표에서 직접 칠어 저장된 값과 달라진 경우 (캘린더 자동반영 전 확인용) */
-  const [slotsDirty, setSlotsDirty] = useState(false)
+  /** 표에서 직접 칠어 저장된 값과 달라진 경우 */
+  const slotsDirtyRef = useRef(false)
 
-  const isGuestJoin = searchParams.get('guest') === '1'
+  const isGuestJoin =
+    searchParams.get('g') === '1' || searchParams.get('guest') === '1'
 
   const resetAsGuest = () => {
     setMyId(null)
@@ -112,8 +114,14 @@ export function JoinPage() {
   useEffect(() => {
     let cancelled = false
     const encoded = searchParams.get('d')
-    const guest = searchParams.get('guest') === '1'
-    const sync = searchParams.get('sync') === '1'
+    const guest =
+      searchParams.get('g') === '1' || searchParams.get('guest') === '1'
+    const sync =
+      searchParams.get('s') === '1' || searchParams.get('sync') === '1'
+    const shareName = searchParams.get('n')?.trim()
+    if (shareName) {
+      document.title = `${shareName} · PinTime`
+    }
     ;(async () => {
       const resolved = await resolveRoomAsync(roomId, encoded)
       if (cancelled) return
@@ -159,7 +167,7 @@ export function JoinPage() {
           clearRoomSession(resolved.id)
           resetAsGuest()
           if (encoded) {
-            setSearchParams({ guest: '1' }, { replace: true })
+            setSearchParams({ g: '1' }, { replace: true })
           }
         }
       } else {
@@ -190,11 +198,10 @@ export function JoinPage() {
         const me = findParticipant(next, session.name, session.password)
         if (me) {
           setMyId(me.id)
-          // 사용자가 표에서 직접 고치는 중이면 캘린더 동기화로 덮지 않음
-          setSlotsDirty((dirty) => {
-            if (!dirty) setMySlots(new Set(me.availableSlots))
-            return dirty
-          })
+          // 사용자가 표에서 직접 고치는 중이면 방 동기화로 덮지 않음
+          if (!slotsDirtyRef.current) {
+            setMySlots(new Set(me.availableSlots))
+          }
         }
       })
     }
@@ -228,7 +235,8 @@ export function JoinPage() {
       return
     }
 
-    const cameAsGuest = searchParams.get('guest') === '1'
+    const cameAsGuest =
+      searchParams.get('g') === '1' || searchParams.get('guest') === '1'
     const participant = makeParticipant(trimmed, credPassword, slots, {
       id: myId && name.trim() === trimmed ? myId : undefined,
       source,
@@ -248,7 +256,7 @@ export function JoinPage() {
     setMySlots(new Set(result.participant.availableSlots))
     setName(result.participant.name)
     setPassword(credPassword)
-    setSlotsDirty(false)
+    slotsDirtyRef.current = false
 
     // 주소창에서 긴 d·guest 제거 (방은 이미 로컬 저장됨)
     if (cameAsGuest || searchParams.get('d')) {
@@ -396,8 +404,8 @@ export function JoinPage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: room.title,
-          text: `${room.title} 일정 조율에 새 이름으로 참여해 주세요`,
+          title: `${room.title} · PinTime`,
+          text: `PinTime「${room.title}」일정 조율에 참여해 주세요`,
           url: inviteUrl,
         })
         showToast('친구에게 보냈어요')
@@ -410,14 +418,10 @@ export function JoinPage() {
     }
   }
 
-  const startAppSyncAsGuest = () => {
-    if (!room) return
-    if (!name.trim() || !password) {
-      showToast('이름과 비밀번호를 먼저 입력해 주세요')
-      return
-    }
-    saveRoomSession(room.id, { name: name.trim(), password })
-    setAuthOpen(true)
+  const openPinTimeElsewhere = () => {
+    const mobile = isLikelyMobile()
+    const url = mobile ? getPublicWebOrigin() : RELEASES_URL
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const beginEditTitle = () => {
@@ -432,31 +436,6 @@ export function JoinPage() {
     setRoom(next)
     setEditingTitle(false)
     showToast('방 이름을 수정했어요')
-  }
-
-  const handleAppSync = (authName: string, authPassword: string) => {
-    setAuthOpen(false)
-    setName(authName)
-    setPassword(authPassword)
-    if (!room) return
-
-    const me = findParticipant(room, authName, authPassword)
-    const handEdited =
-      slotsDirty || isHandEditedSource(me?.source)
-    if (handEdited) {
-      const ok = window.confirm(
-        `이 공유 링크의 가능 시간을 직접 수정한 흔적이 있어요.\n\n캘린더 일정 기준으로 덮어쓸까요?\n(이 링크만 따로 둔 것이라면 취소를 눌러 주세요)`,
-      )
-      if (!ok) {
-        showToast('캘린더 반영을 취소했어요 · 이 링크 일정은 그대로예요')
-        return
-      }
-    }
-
-    const slots = busyToAvailableSlotsForRoom(schedules, allDay, room)
-    setMySlots(new Set(slots))
-    setSlotsDirty(false)
-    register(slots, 'app', authName, authPassword)
   }
 
   const handleCopyMine = async () => {
@@ -558,7 +537,7 @@ export function JoinPage() {
 
     setSelectedDate(appointment.date)
     setView('week')
-    window.setTimeout(() => navigate('/calendar'), 450)
+    window.setTimeout(() => navigate('/'), 450)
   }
 
   if (missing) {
@@ -816,7 +795,7 @@ export function JoinPage() {
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="예: 민수"
+                placeholder={namePlaceholder}
                 className="mt-1 w-full rounded-xl border border-emerald-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100"
               />
             </div>
@@ -843,11 +822,20 @@ export function JoinPage() {
             </button>
             <button
               type="button"
-              onClick={startAppSyncAsGuest}
+              onClick={openPinTimeElsewhere}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
             >
-              <Smartphone size={15} />
-              앱 연동하기
+              {isLikelyMobile() ? (
+                <>
+                  <ExternalLink size={15} />
+                  핀타임 웹 구경가기
+                </>
+              ) : (
+                <>
+                  <Download size={15} />
+                  앱 깔러 가기
+                </>
+              )}
             </button>
           </div>
           <p className="mt-2 text-[11px] text-emerald-900/70">
@@ -902,7 +890,7 @@ export function JoinPage() {
             selected={mySlots}
             onChange={(next) => {
               setMySlots(next)
-              setSlotsDirty(true)
+              slotsDirtyRef.current = true
             }}
             title={myTitle}
           />
@@ -1054,18 +1042,29 @@ export function JoinPage() {
           </section>
 
           <section className="min-w-0 rounded-xl border border-slate-200 bg-white p-3">
-            <p className="text-xs font-bold text-slate-900">앱·JSON 연동</p>
+            <p className="text-xs font-bold text-slate-900">PinTime 더 보기</p>
             <p className="mt-1 text-[11px] leading-snug text-slate-500">
-              캘린더 자동 반영, 또는 JSON으로 다른 곳에 옮기기
+              {isLikelyMobile()
+                ? '일정 조율 말고, PinTime 웹을 둘러볼 수 있어요'
+                : '데스크톱 앱을 받아 캘린더를 써 보세요'}
             </p>
             <div className="mt-2 flex flex-col gap-1.5">
               <button
                 type="button"
-                onClick={() => setAuthOpen(true)}
+                onClick={openPinTimeElsewhere}
                 className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-3 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
               >
-                <Smartphone size={15} />
-                앱 연동
+                {isLikelyMobile() ? (
+                  <>
+                    <ExternalLink size={15} />
+                    핀타임 웹 구경가기
+                  </>
+                ) : (
+                  <>
+                    <Download size={15} />
+                    앱 깔러 가기
+                  </>
+                )}
               </button>
               <button
                 type="button"
@@ -1103,13 +1102,6 @@ export function JoinPage() {
 
       </div>
 
-      <AuthModal
-        open={authOpen}
-        onClose={() => setAuthOpen(false)}
-        initialName={name}
-        initialPassword={password}
-        onSuccess={handleAppSync}
-      />
       <Toast message={toast} />
     </div>
   )

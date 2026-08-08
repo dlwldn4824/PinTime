@@ -18,4 +18,5 @@ contextBridge.exposeInMainWorld('pintimeDesktop', {
     ipcRenderer.on('desktop-pin:view', handler)
     return () => ipcRenderer.removeListener('desktop-pin:view', handler)
   },
+  openExternal: (url) => ipcRenderer.invoke('pintime:open-external', url),
 })

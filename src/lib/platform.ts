@@ -14,6 +14,7 @@ export type PinTimeDesktopApi = {
   setDesktopPinView: (view: CalendarWidgetView) => Promise<boolean>
   onDesktopPinChanged: (cb: (open: boolean) => void) => () => void
   onDesktopPinView: (cb: (view: CalendarWidgetView) => void) => () => void
+  openExternal: (url: string) => Promise<boolean>
 }
 
 declare global {
@@ -43,11 +44,11 @@ export function shouldRenderDesktopPin() {
   return isDesktopPinMode() && isElectronApp()
 }
 
-/** 브라우저가 ?mode=desktop-pin 으로 들어온 경우 URL 정리 후 /calendar 로 */
+/** 브라우저가 ?mode=desktop-pin 으로 들어온 경우 URL 정리 후 홈으로 */
 export function stripDesktopPinQueryIfBrowser() {
   if (typeof window === 'undefined') return false
   if (!isDesktopPinMode() || isElectronApp()) return false
-  window.history.replaceState({}, '', '/calendar')
+  window.history.replaceState({}, '', '/')
   return true
 }
 
@@ -83,6 +84,13 @@ export function saveWidgetEnabled(enabled: boolean) {
   } catch {
     /* ignore */
   }
+}
+
+export function isLikelyMobile(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent,
+  )
 }
 
 /** PWA / 홈 화면 설치 가능 여부 */

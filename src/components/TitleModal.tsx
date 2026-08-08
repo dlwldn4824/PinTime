@@ -165,6 +165,7 @@ export function TitleModal({
           value={extras}
           onChange={setExtras}
           repeatAnchorDate={repeatAnchorDate}
+          accentColor={color}
         />
 
         <div className="mt-4 flex items-center justify-between gap-2">

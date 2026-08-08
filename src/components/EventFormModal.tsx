@@ -4,6 +4,7 @@ import { EventExtrasBar, type EventExtras } from './EventExtrasBar'
 import {
   DEFAULT_EVENT_COLOR,
   EVENT_COLOR_IDS,
+  toneOf,
   type EventColorId,
 } from '../lib/eventColors'
 import {
@@ -139,6 +140,8 @@ export function EventFormModal({
 
   if (!open) return null
 
+  const accent = toneOf(color)
+
   const submit = () => {
     if (!canSubmit) return
     let nextEnd = endDate < startDate ? startDate : endDate
@@ -192,7 +195,10 @@ export function EventFormModal({
         <div className="mt-4 divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-white">
           <div className="flex items-center justify-between gap-3 px-3.5 py-3">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-100 text-[11px] font-bold text-violet-600">
+              <span
+                className="flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold"
+                style={{ background: accent.soft, color: accent.text }}
+              >
                 24
               </span>
               <span className="text-sm font-semibold text-slate-800">종일</span>
@@ -203,8 +209,9 @@ export function EventFormModal({
               aria-checked={allDay}
               onClick={() => setAllDay((v) => !v)}
               className={`relative h-7 w-12 shrink-0 rounded-full transition ${
-                allDay ? 'bg-violet-500' : 'bg-slate-200'
+                allDay ? '' : 'bg-slate-200'
               }`}
+              style={allDay ? { background: accent.solid } : undefined}
             >
               <span
                 className={`absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition ${
@@ -304,6 +311,7 @@ export function EventFormModal({
             value={extras}
             onChange={setExtras}
             repeatAnchorDate={startDate}
+            accentColor={color}
           />
         ) : (
           <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-[11px] leading-relaxed text-slate-500">

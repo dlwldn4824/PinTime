@@ -4,6 +4,9 @@ const TODO_KEY = 'pintime:todos:v1'
 
 export type TodoKind = 'daily' | 'standing'
 
+/** 캘린더에서 자동 등록된 할 일 */
+export type TodoSource = 'schedule' | 'allDay'
+
 export type TodoItem = {
   id: string
   text: string
@@ -12,6 +15,10 @@ export type TodoItem = {
   /** daily만 — YYYY-MM-DD */
   date?: string
   createdAt: number
+  /** 없으면 수동 추가 */
+  source?: TodoSource
+  /** schedule:occurrenceId | allDay:id@date */
+  sourceKey?: string
 }
 
 export type TodoState = {
@@ -41,6 +48,10 @@ export function loadTodos(): TodoState {
 export function saveTodos(state: TodoState) {
   localStorage.setItem(TODO_KEY, JSON.stringify(state))
   window.dispatchEvent(new CustomEvent('pintime:todos'))
+  void import('./cloudSync').then((m) => {
+    if (m.isApplyingRemoteTodos()) return
+    m.schedulePushTodos(state)
+  })
 }
 
 export function toggleTodoDone(id: string): TodoState {
@@ -58,6 +69,8 @@ export function createTodo(input: {
   text: string
   kind: TodoKind
   date?: string
+  source?: TodoSource
+  sourceKey?: string
 }): TodoItem {
   return {
     id: createId(),
@@ -66,5 +79,11 @@ export function createTodo(input: {
     kind: input.kind,
     date: input.kind === 'daily' ? input.date : undefined,
     createdAt: Date.now(),
+    source: input.source,
+    sourceKey: input.sourceKey,
   }
+}
+
+export function isCalendarTodo(item: TodoItem): boolean {
+  return item.source === 'schedule' || item.source === 'allDay'
 }

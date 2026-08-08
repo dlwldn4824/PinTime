@@ -6,6 +6,14 @@
 [build.environment]
   NODE_VERSION = "22"
 
+[[edge_functions]]
+  function = "og-share"
+  path = "/j/*"
+
+[[edge_functions]]
+  function = "og-share"
+  path = "/join/*"
+
 # Existing files in dist/ (pitch.html, pitch-export/, assets/) are served as-is.
 # Everything else falls through to the SPA.
 [[redirects]]
@@ -17,3 +25,9 @@
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/og.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+    Content-Type = "image/jpeg"

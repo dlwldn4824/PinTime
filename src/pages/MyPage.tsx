@@ -1,13 +1,16 @@
 import {
   Check,
   ChartColumn,
+  Download,
   Monitor,
   Palette,
+  RefreshCw,
   Smartphone,
   Trash2,
   UserRound,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useAuth, firebaseAuthErrorMessage } from '../context/AuthContext'
 import { useCalendar } from '../context/CalendarContext'
 import { useTheme, type AppTheme } from '../context/ThemeContext'
 import {
@@ -16,10 +19,22 @@ import {
   track,
 } from '../lib/analytics'
 import {
+  APP_VERSION,
+  checkForAppUpdate,
+  RELEASES_URL,
+  type UpdateCheckResult,
+} from '../lib/appUpdate'
+import { pushProfile } from '../lib/cloudSync'
+import {
   getDesktopApi,
   isElectronApp,
   loadWidgetView,
 } from '../lib/platform'
+import {
+  loadMyName,
+  nameExamplePlaceholder,
+  saveMyName,
+} from '../lib/storage'
 
 const themes: Array<{
   id: AppTheme
@@ -49,13 +64,60 @@ type BeforeInstallPromptEvent = Event & {
 export function MyPage() {
   const { theme, setTheme } = useTheme()
   const { schedules, allDay, clearCalendar } = useCalendar()
+  const {
+    configured: firebaseOn,
+    user,
+    loading: authLoading,
+    syncing,
+    syncError,
+    signInGoogle,
+    signInEmail,
+    signUpEmail,
+    signOut,
+  } = useAuth()
   const electron = isElectronApp()
   const [pinOpen, setPinOpen] = useState(false)
   const [clearedMsg, setClearedMsg] = useState<string | null>(null)
   const [analyticsOn, setAnalyticsOn] = useState(() => loadAnalyticsConsent())
+  const [displayName, setDisplayName] = useState(() => loadMyName())
+  const [namePlaceholder] = useState(() => nameExamplePlaceholder())
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [signupName, setSignupName] = useState(() => loadMyName())
+  const [authBusy, setAuthBusy] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [authOk, setAuthOk] = useState<string | null>(null)
   const [installEvt, setInstallEvt] =
     useState<BeforeInstallPromptEvent | null>(null)
   const [installed, setInstalled] = useState(false)
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null)
+  const [updateChecking, setUpdateChecking] = useState(false)
+
+  useEffect(() => {
+    if (user?.displayName) setDisplayName(user.displayName)
+  }, [user])
+
+  const openReleases = (url = RELEASES_URL) => {
+    const api = getDesktopApi()
+    if (api?.openExternal) {
+      void api.openExternal(url)
+      return
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  const runUpdateCheck = async () => {
+    setUpdateChecking(true)
+    const result = await checkForAppUpdate()
+    setUpdateInfo(result)
+    setUpdateChecking(false)
+  }
+
+  useEffect(() => {
+    if (!electron) return
+    void runUpdateCheck()
+  }, [electron])
 
   useEffect(() => {
     const api = getDesktopApi()
@@ -109,10 +171,242 @@ export function MyPage() {
           <div className="min-w-0">
             <h1 className="text-lg font-bold text-[var(--ink)]">마이페이지</h1>
             <p className="text-xs text-[var(--muted)]">
-              테마 · 앱 설정
+              표시 이름 · 테마 · 앱 설정
             </p>
           </div>
         </header>
+
+        <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <UserRound size={16} className="text-[var(--tomato)]" />
+            <h2 className="text-sm font-bold text-[var(--ink)]">계정</h2>
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+            계정을 만들면 캘린더와 할 일이 저장되어, 다른 기기에서도 그대로
+            이어서 쓸 수 있어요.
+          </p>
+
+          {!firebaseOn ? (
+            <div className="mt-3 space-y-2 rounded-xl bg-[var(--bg)] px-3.5 py-3 text-[11px] leading-relaxed text-[var(--muted)]">
+              <p className="font-semibold text-[var(--ink)]">
+                아직 계정 서버가 연결되지 않았어요
+              </p>
+              <ol className="list-decimal space-y-1 pl-4">
+                <li>
+                  <a
+                    href="https://console.firebase.google.com/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-[var(--tomato)] underline"
+                  >
+                    Firebase Console
+                  </a>
+                  에서 프로젝트 생성
+                </li>
+                <li>Authentication → Email/Password 사용 설정 ON</li>
+                <li>Firestore Database 만들고 규칙에 firestore.rules 배포</li>
+                <li>
+                  프로젝트 설정 → 웹 앱 SDK 값을{' '}
+                  <code className="rounded bg-white px-1">.env.local</code> 에
+                  넣고 개발 서버 재시작
+                </li>
+              </ol>
+              <p>
+                키 이름:{' '}
+                <code className="rounded bg-white px-1">
+                  VITE_FIREBASE_API_KEY
+                </code>{' '}
+                등 · 예시는{' '}
+                <code className="rounded bg-white px-1">.env.example</code>
+              </p>
+            </div>
+          ) : authLoading ? (
+            <p className="mt-3 text-[11px] text-[var(--muted)]">확인 중…</p>
+          ) : user ? (
+            <div className="mt-3 space-y-3">
+              <div className="rounded-xl bg-[var(--bg)] px-3.5 py-3">
+                <p className="text-sm font-semibold text-[var(--ink)]">
+                  {user.displayName || user.email || '로그인됨'}
+                </p>
+                {user.email && (
+                  <p className="mt-0.5 text-[11px] text-[var(--muted)]">
+                    {user.email}
+                  </p>
+                )}
+                <p className="mt-1 text-[11px] text-[var(--muted)]">
+                  {syncing
+                    ? '저장 중…'
+                    : syncError
+                      ? `저장 오류: ${syncError}`
+                      : '로그인됨 · 일정이 기기에 맞춰 저장돼요'}
+                </p>
+              </div>
+              {authOk && (
+                <p className="text-[11px] font-semibold text-[var(--pin-text)]">
+                  {authOk}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthOk(null)
+                  void signOut()
+                }}
+                className="w-full rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--bg)]"
+              >
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <div className="mt-3 space-y-3">
+              <div className="flex gap-1 rounded-xl bg-[var(--bg)] p-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('signup')
+                    setAuthError(null)
+                  }}
+                  className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                    authMode === 'signup'
+                      ? 'bg-white text-[var(--tomato)] shadow-sm'
+                      : 'text-[var(--muted)]'
+                  }`}
+                >
+                  회원가입
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('signin')
+                    setAuthError(null)
+                  }}
+                  className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                    authMode === 'signin'
+                      ? 'bg-white text-[var(--tomato)] shadow-sm'
+                      : 'text-[var(--muted)]'
+                  }`}
+                >
+                  로그인
+                </button>
+              </div>
+
+              <form
+                className="space-y-2"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  setAuthError(null)
+                  setAuthOk(null)
+                  setAuthBusy(true)
+                  const run =
+                    authMode === 'signup'
+                      ? signUpEmail(email, password, signupName).then(() => {
+                          setAuthOk('가입 완료 · 이제 일정이 저장돼요')
+                          if (signupName.trim()) {
+                            setDisplayName(signupName.trim())
+                            saveMyName(signupName.trim())
+                          }
+                        })
+                      : signInEmail(email, password)
+                  void run
+                    .catch((err: unknown) =>
+                      setAuthError(firebaseAuthErrorMessage(err)),
+                    )
+                    .finally(() => setAuthBusy(false))
+                }}
+              >
+                {authMode === 'signup' && (
+                  <input
+                    type="text"
+                    value={signupName}
+                    onChange={(e) => setSignupName(e.target.value)}
+                    placeholder="이름"
+                    required
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white"
+                  />
+                )}
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="이메일"
+                  required
+                  autoComplete="email"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white"
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="비밀번호 (6자 이상)"
+                  required
+                  minLength={6}
+                  autoComplete={
+                    authMode === 'signup' ? 'new-password' : 'current-password'
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white"
+                />
+                <button
+                  type="submit"
+                  disabled={authBusy}
+                  className="w-full rounded-xl bg-[var(--tomato)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--tomato-deep)] disabled:opacity-50"
+                >
+                  {authBusy
+                    ? '잠시만요…'
+                    : authMode === 'signup'
+                      ? '가입하기'
+                      : '로그인'}
+                </button>
+              </form>
+
+              <button
+                type="button"
+                disabled={authBusy}
+                onClick={() => {
+                  setAuthError(null)
+                  setAuthBusy(true)
+                  void signInGoogle()
+                    .catch((e: unknown) =>
+                      setAuthError(firebaseAuthErrorMessage(e)),
+                    )
+                    .finally(() => setAuthBusy(false))
+                }}
+                className="w-full rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--bg)] disabled:opacity-50"
+              >
+                Google로 계속
+              </button>
+
+              {authError && (
+                <p className="text-[11px] text-rose-600">{authError}</p>
+              )}
+            </div>
+          )}
+        </section>
+
+        <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <UserRound size={16} className="text-[var(--tomato)]" />
+            <h2 className="text-sm font-bold text-[var(--ink)]">표시 이름</h2>
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+            공유·조율에서 나를 표시할 이름이에요. 다른 화면의 이름 예시에도
+            쓰입니다.
+          </p>
+          <input
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            onBlur={() => {
+              saveMyName(displayName)
+              if (user) {
+                void pushProfile(user.uid, {
+                  displayName: displayName.trim(),
+                  email: user.email,
+                }).catch(() => undefined)
+              }
+            }}
+            placeholder={namePlaceholder}
+            className="mt-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
+          />
+        </section>
 
         <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2">
@@ -247,7 +541,7 @@ export function MyPage() {
               노트북 앱(Windows · macOS)은{' '}
               <a
                 className="font-semibold text-[var(--tomato)] underline-offset-2 hover:underline"
-                href="https://github.com/dlwldn4824/PinTime/releases"
+                href={RELEASES_URL}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -256,6 +550,62 @@ export function MyPage() {
             </div>
           )}
         </section>
+
+        {electron && (
+          <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Download size={16} className="text-[var(--tomato)]" />
+              <h2 className="text-sm font-bold text-[var(--ink)]">앱 업데이트</h2>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-[var(--muted)]">
+              현재 버전 v{APP_VERSION}. 새 버전이 있으면 Releases에서 받아
+              다시 설치하세요. (자동 설치는 아직 없어요)
+            </p>
+
+            {updateInfo?.status === 'update-available' && (
+              <div className="mt-3 rounded-xl bg-[var(--tomato-soft)]/60 px-3.5 py-3">
+                <p className="text-sm font-semibold text-[var(--ink)]">
+                  v{updateInfo.latest} 업데이트 가능
+                </p>
+                <p className="mt-0.5 text-[11px] text-[var(--muted)]">
+                  지금 v{updateInfo.current} 사용 중
+                </p>
+                <button
+                  type="button"
+                  onClick={() => openReleases(updateInfo.htmlUrl)}
+                  className="mt-3 w-full rounded-xl bg-[var(--tomato)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--tomato-deep)]"
+                >
+                  Releases에서 받기
+                </button>
+              </div>
+            )}
+
+            {updateInfo?.status === 'up-to-date' && (
+              <p className="mt-3 rounded-xl bg-[var(--bg)] px-3.5 py-2.5 text-[11px] font-medium text-[var(--muted)]">
+                최신 버전이에요 (v{updateInfo.latest})
+              </p>
+            )}
+
+            {updateInfo?.status === 'error' && (
+              <p className="mt-3 rounded-xl bg-[var(--bg)] px-3.5 py-2.5 text-[11px] text-[var(--muted)]">
+                {updateInfo.message}
+              </p>
+            )}
+
+            <button
+              type="button"
+              disabled={updateChecking}
+              onClick={() => void runUpdateCheck()}
+              className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--line)] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--bg)] disabled:opacity-50"
+            >
+              <RefreshCw
+                size={15}
+                className={updateChecking ? 'animate-spin' : undefined}
+              />
+              {updateChecking ? '확인 중…' : '업데이트 확인'}
+            </button>
+          </section>
+        )}
 
         {!electron && (
           <section className="rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">

@@ -26,6 +26,7 @@ import {
   loadMyRooms,
   loadRoom,
   loadUserId,
+  nameExamplePlaceholder,
   removeMyRoom,
   saveMyName,
   type MyRoomRef,
@@ -44,6 +45,7 @@ export function SharePage() {
   const userId = useMemo(() => loadUserId(), [])
   const defaults = useMemo(() => defaultRoomRange(), [])
   const [displayName, setDisplayName] = useState(loadMyName() || '')
+  const [namePlaceholder] = useState(() => nameExamplePlaceholder())
   const [roomTitle, setRoomTitle] = useState('')
   const [mode, setMode] = useState<DateSelectMode>('dates')
   const [selectedDates, setSelectedDates] = useState<string[]>(defaults.dates)
@@ -148,8 +150,8 @@ export function SharePage() {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: activeRoom.title,
-          text: `${activeRoom.title} 일정 조율에 새 이름으로 참여해 주세요`,
+          title: `${activeRoom.title} · PinTime`,
+          text: `PinTime「${activeRoom.title}」일정 조율에 참여해 주세요`,
           url: shareUrl,
         })
         showToast('친구에게 보냈어요')
@@ -202,7 +204,7 @@ export function SharePage() {
             onBlur={() => {
               if (displayName.trim()) saveMyName(displayName.trim())
             }}
-            placeholder="예: 지우"
+            placeholder={namePlaceholder}
             className="mt-1.5 w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm outline-none focus:border-[var(--tomato)] focus:bg-white focus:ring-2 focus:ring-[var(--tomato-soft)]"
           />
         </section>
@@ -343,9 +345,9 @@ export function SharePage() {
               >
                 <p className="text-sm font-bold text-slate-900">초대 링크</p>
                 <p className="mt-1 text-[11px] leading-relaxed text-slate-500">
-                  내 가능 시간이 담긴 링크입니다. 친구가 열면 겹치는 시간을
-                  바로 보고, 새 이름으로 등록할 수 있어요. (비밀번호는 넣지
-                  않습니다)
+                  배포 웹 주소로 된 짧은 초대 링크입니다. 친구가 새 이름으로
+                  가능 시간을 등록한 뒤 「호스트에게 전달」을 보내면 겹침이
+                  반영됩니다. 카톡 미리보기에는 PinTime과 방 이름이 표시됩니다.
                 </p>
                 <p className="mt-3 break-all rounded-xl bg-slate-50 px-3 py-2.5 font-mono text-[11px] leading-relaxed text-slate-700 ring-1 ring-slate-200">
                   {shareUrl || '링크 만드는 중…'}

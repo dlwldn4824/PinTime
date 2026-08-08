@@ -28,7 +28,7 @@
   "shortcuts": [
     {
       "name": "캘린더",
-      "url": "/calendar",
+      "url": "/",
       "description": "주간·월간 캘린더 열기"
     },
     {

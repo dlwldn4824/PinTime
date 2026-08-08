@@ -14,6 +14,8 @@ import {
   confirmOverwriteManualRooms,
   syncMyAvailabilityAcrossRooms,
 } from '../lib/calendarRoomSync'
+import { onCalendarRemote } from '../lib/cloudSync'
+import { syncCalendarTodos } from '../lib/scheduleTodos'
 import { loadCalendar, saveCalendar } from '../lib/storage'
 import {
   type AllDayEvent,
@@ -72,12 +74,21 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     saveCalendar({ schedules, allDay })
   }, [schedules, allDay])
 
+  useEffect(() => {
+    return onCalendarRemote((state) => {
+      setSchedules(state.schedules)
+      setAllDay(state.allDay)
+    })
+  }, [])
+
   // 캘린더 ↔ 공유 링크 가능시간 동기화 (앱 반영 방은 자동, 수동 수정 방은 확인)
   const lastCalendarSyncKey = useRef<string | null>(null)
   useEffect(() => {
     const key = JSON.stringify({ schedules, allDay })
     if (lastCalendarSyncKey.current === null) {
       lastCalendarSyncKey.current = key
+      // 첫 로드에서도 일정 → 할 일 미러링
+      syncCalendarTodos(schedules, allDay)
       return
     }
     if (lastCalendarSyncKey.current === key) return
@@ -85,6 +96,7 @@ export function CalendarProvider({ children }: { children: ReactNode }) {
     syncMyAvailabilityAcrossRooms(schedules, allDay, {
       confirmManual: confirmOverwriteManualRooms,
     })
+    syncCalendarTodos(schedules, allDay)
   }, [schedules, allDay])
 
   const setSelectedDate = useCallback((dateKey: string) => {

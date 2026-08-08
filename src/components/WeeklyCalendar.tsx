@@ -1,9 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Check } from 'lucide-react'
 import { solidAlpha, toneOf } from '../lib/eventColors'
 import {
   expandSchedulesInRange,
   type ScheduleOccurrence,
 } from '../lib/recurrence'
+import {
+  loadTodos,
+  toggleTodoDone,
+  type TodoItem,
+} from '../lib/todos'
 import {
   DAYS,
   HOURS,
@@ -157,11 +163,54 @@ export function WeeklyCalendar({
 }: WeeklyCalendarProps) {
   const [drag, setDrag] = useState<DragState | null>(null)
   const dragging = useRef(false)
+  const [todos, setTodos] = useState<TodoItem[]>(() => loadTodos().items)
+
+  useEffect(() => {
+    const refresh = () => setTodos(loadTodos().items)
+    window.addEventListener('pintime:todos', refresh)
+    window.addEventListener('storage', refresh)
+    return () => {
+      window.removeEventListener('pintime:todos', refresh)
+      window.removeEventListener('storage', refresh)
+    }
+  }, [])
 
   const cols = useMemo(() => weekColumns(weekAnchor), [weekAnchor])
   const todayKey = toDateKey(new Date())
   const weekLabel =
     cols.length > 0 ? weekRangeLabel(cols[0].date, cols[6].date) : ''
+
+  const standingOpen = useMemo(
+    () =>
+      todos
+        .filter((t) => t.kind === 'standing' && !t.done)
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .slice(0, 4),
+    [todos],
+  )
+
+  const dailyByDate = useMemo(() => {
+    const map = new Map<string, TodoItem[]>()
+    for (const t of todos) {
+      if (t.kind !== 'daily' || !t.date || t.done) continue
+      const list = map.get(t.date) ?? []
+      list.push(t)
+      map.set(t.date, list)
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => a.createdAt - b.createdAt)
+    }
+    return map
+  }, [todos])
+
+  const weekTodoStrip = useMemo(() => {
+    const todayDaily = (dailyByDate.get(todayKey) ?? []).slice(0, 4)
+    return [...standingOpen, ...todayDaily]
+  }, [standingOpen, dailyByDate, todayKey])
+
+  const toggleTodo = (id: string) => {
+    setTodos(toggleTodoDone(id).items)
+  }
 
   const segments = useMemo(
     () => allDaySegmentsForWeek(cols, allDayEvents),
@@ -280,6 +329,35 @@ export function WeeklyCalendar({
         </button>
       </div>
 
+      {weekTodoStrip.length > 0 && (
+        <div className="shrink-0 border-b border-slate-100 bg-[var(--bg)]/80 px-3 py-2">
+          <p className="mb-1.5 text-[10px] font-bold tracking-wide text-[var(--muted)] uppercase">
+            할 일 · 상시 · 오늘
+          </p>
+          <ul className="flex flex-wrap gap-1.5">
+            {weekTodoStrip.map((t) => (
+              <li key={t.id}>
+                <button
+                  type="button"
+                  onClick={() => toggleTodo(t.id)}
+                  className="inline-flex max-w-[11rem] items-center gap-1.5 rounded-full border border-[var(--line)] bg-white px-2.5 py-1 text-left text-[11px] font-medium text-[var(--ink)] shadow-sm transition hover:border-[var(--tomato)]/40"
+                >
+                  <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded border border-slate-300" />
+                  <span className="truncate">
+                    {t.kind === 'standing' ? (
+                      <span className="mr-1 text-[9px] font-bold text-slate-400">
+                        상시
+                      </span>
+                    ) : null}
+                    {t.text}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* 요일 · 종일 · 시간 — TimeTree식 단일 스크롤 그리드 */}
       <div className="pt-scroll min-h-0 flex-1 overflow-auto">
         {/* 요일 헤더: 위 요일 / 아래 날짜 숫자 */}
@@ -291,6 +369,7 @@ export function WeeklyCalendar({
             const isToday = col.date === todayKey
             const isSun = col.day === '일'
             const isSat = col.day === '토'
+            const dayTodos = dailyByDate.get(col.date) ?? []
             return (
               <button
                 key={col.date}
@@ -324,16 +403,76 @@ export function WeeklyCalendar({
                 >
                   {col.dayNum}
                 </span>
+                {dayTodos.length > 0 && (
+                  <span className="mt-0.5 flex h-1 gap-0.5">
+                    {dayTodos.slice(0, 3).map((t) => (
+                      <span
+                        key={t.id}
+                        className="h-1 w-1 rounded-full bg-[var(--tomato)]"
+                      />
+                    ))}
+                  </span>
+                )}
               </button>
             )
           })}
+        </div>
+
+        {/* 요일별 할 일 */}
+        <div
+          className={`sticky z-20 border-b ${GRID_LINE} bg-white`}
+          style={{ top: '3.35rem' }}
+        >
+          <div className={`grid ${COL}`}>
+            <div
+              className={`flex min-w-0 items-start justify-end border-r ${GRID_LINE} py-1.5 pr-1.5`}
+            >
+              <span className="text-[10px] font-medium text-slate-400">
+                할일
+              </span>
+            </div>
+            {cols.map((col) => {
+              const dayTodos = (dailyByDate.get(col.date) ?? []).slice(0, 3)
+              return (
+                <div
+                  key={`todo-${col.date}`}
+                  className={`min-w-0 space-y-0.5 border-r ${GRID_LINE} px-0.5 py-1 last:border-r-0 ${
+                    col.date === todayKey ? 'bg-[var(--tomato-soft)]/15' : ''
+                  }`}
+                >
+                  {dayTodos.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => toggleTodo(t.id)}
+                      className="flex w-full items-start gap-0.5 rounded px-0.5 py-0.5 text-left hover:bg-slate-50"
+                      title={t.text}
+                    >
+                      <span className="mt-0.5 flex h-2.5 w-2.5 shrink-0 items-center justify-center rounded-sm border border-slate-300">
+                        {t.done && (
+                          <Check
+                            size={7}
+                            strokeWidth={3}
+                            className="text-[var(--tomato)]"
+                          />
+                        )}
+                      </span>
+                      <span className="min-w-0 truncate text-[9px] leading-tight font-medium text-slate-700">
+                        {t.text}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
         </div>
 
         {/* 종일 */}
         <div
           className={`sticky z-20 border-b ${GRID_LINE} bg-white`}
           style={{
-            top: '3.35rem',
+            top: 'calc(3.35rem + 2.75rem)',
             minHeight: allDayHeight,
           }}
         >

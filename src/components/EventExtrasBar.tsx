@@ -1,5 +1,6 @@
 import { FileText, Link2, MapPin, Plus, Repeat } from 'lucide-react'
 import { useState } from 'react'
+import { toneOf, type EventColorId } from '../lib/eventColors'
 import { RepeatPickerModal, repeatLabel } from './RepeatPickerModal'
 
 export type EventExtras = {
@@ -29,15 +30,19 @@ type EventExtrasBarProps = {
   onChange: (next: EventExtras) => void
   /** 반복 시작 기준일 — 종료일 최소값 */
   repeatAnchorDate?: string
+  /** 일정 색상 — 아이콘·칩 강조색 */
+  accentColor?: EventColorId | string
 }
 
 export function EventExtrasBar({
   value,
   onChange,
   repeatAnchorDate,
+  accentColor,
 }: EventExtrasBarProps) {
   const [active, setActive] = useState<FieldKey | null>(null)
   const [repeatOpen, setRepeatOpen] = useState(false)
+  const tone = toneOf(accentColor)
 
   const toggle = (key: FieldKey) => {
     setActive((prev) => (prev === key ? null : key))
@@ -49,7 +54,10 @@ export function EventExtrasBar({
   return (
     <div className="mt-3">
       <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch]">
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center text-violet-400">
+        <span
+          className="flex h-8 w-8 shrink-0 items-center justify-center"
+          style={{ color: tone.solid }}
+        >
           <Plus size={18} strokeWidth={2.25} />
         </span>
 
@@ -60,36 +68,45 @@ export function EventExtrasBar({
             setRepeatOpen(true)
           }}
           className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-            repeatFilled
-              ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-              : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
+            repeatFilled ? '' : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
           }`}
+          style={
+            repeatFilled
+              ? {
+                  background: tone.soft,
+                  color: tone.text,
+                  boxShadow: `inset 0 0 0 1px ${tone.solid}40`,
+                }
+              : undefined
+          }
         >
-          <Repeat
-            size={14}
-            className={repeatFilled ? 'text-violet-500' : 'text-violet-400'}
-          />
+          <Repeat size={14} style={{ color: tone.solid }} />
           {repeatLabel(value.repeat, value.repeatUntil)}
         </button>
 
         {CHIPS.map(({ key, label, icon: Icon }) => {
           const filled = Boolean(value[key]?.trim())
           const on = active === key
+          const accent = on || filled
           return (
             <button
               key={key}
               type="button"
               onClick={() => toggle(key)}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition ${
-                on || filled
-                  ? 'bg-violet-100 text-violet-700 ring-1 ring-violet-200'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
+                accent ? '' : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
               }`}
+              style={
+                accent
+                  ? {
+                      background: tone.soft,
+                      color: tone.text,
+                      boxShadow: `inset 0 0 0 1px ${tone.solid}40`,
+                    }
+                  : undefined
+              }
             >
-              <Icon
-                size={14}
-                className={on || filled ? 'text-violet-500' : 'text-violet-400'}
-              />
+              <Icon size={14} style={{ color: tone.solid }} />
               {label}
             </button>
           )
@@ -106,7 +123,15 @@ export function EventExtrasBar({
               }
               placeholder={activeChip.placeholder}
               rows={2}
-              className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-300 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none focus:bg-white"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = tone.solid
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${tone.soft}`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
           ) : (
             <input
@@ -115,7 +140,15 @@ export function EventExtrasBar({
                 onChange({ ...value, [activeChip.key]: e.target.value })
               }
               placeholder={activeChip.placeholder}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none focus:border-violet-300 focus:bg-white focus:ring-2 focus:ring-violet-100"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 outline-none focus:bg-white"
+              onFocus={(e) => {
+                e.currentTarget.style.borderColor = tone.solid
+                e.currentTarget.style.boxShadow = `0 0 0 2px ${tone.soft}`
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.borderColor = ''
+                e.currentTarget.style.boxShadow = ''
+              }}
             />
           )}
         </div>

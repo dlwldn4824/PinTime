@@ -231,8 +231,8 @@ export function shareLinkFor(
 }
 
 /**
- * 친구 초대: 가능시간 포함(압축) + guest=1.
- * 비밀번호는 넣지 않음. 친구가 겹치는 시간을 볼 수 있게 함.
+ * 친구 초대: 짧은 방 설정 링크 + g=1 (배포 웹 URL).
+ * 가능시간은 친구가 등록 후 sync 링크로 호스트에게 전달.
  */
 export async function inviteLinkFor(room: ShareRoom): Promise<string> {
   return buildInviteUrl(room)

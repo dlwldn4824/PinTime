@@ -2,14 +2,12 @@ import {
   CalendarDays,
   Link2,
   ListTodo,
-  Sparkles,
   UserRound,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const items = [
-  { to: '/', label: '에이전트', icon: Sparkles, end: true },
-  { to: '/calendar', label: '캘린더', icon: CalendarDays, end: false },
+  { to: '/', label: '캘린더', icon: CalendarDays, end: true },
   { to: '/share', label: '공유', icon: Link2, end: false },
   { to: '/todo', label: '할일', icon: ListTodo, end: false },
   { to: '/me', label: '마이', icon: UserRound, end: false },
@@ -26,7 +24,7 @@ export function MainNav({ variant = 'sidebar', className = '' }: MainNavProps) {
 
   return (
     <nav
-      className={`grid grid-cols-5 gap-1 rounded-2xl p-1 ${
+      className={`grid grid-cols-4 gap-1 rounded-2xl p-1 ${
         floating
           ? 'bg-[var(--sidebar)] shadow-lg shadow-black/10 ring-1 ring-black/5'
           : 'bg-[var(--sidebar-elevated)]'

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
+import { startDateIconUpdates } from './lib/dateIcon'
 import { clearAllPinTimeData } from './lib/storage'
 import {
   isDesktopPinMode,
@@ -10,7 +11,7 @@ import {
   stripDesktopPinQueryIfBrowser,
 } from './lib/platform'
 
-// http://localhost:5173/?reset=1 → 로컬 테스트 기록 초기화
+// http://localhost:5173/?reset=1 → 로컬 테스트 저장 초기화
 if (typeof window !== 'undefined') {
   stripDesktopPinQueryIfBrowser()
   const params = new URLSearchParams(window.location.search)
@@ -21,6 +22,7 @@ if (typeof window !== 'undefined') {
     window.history.replaceState({}, '', next)
     console.info('[PinTime] local data cleared', removed)
   }
+  startDateIconUpdates()
 }
 
 createRoot(document.getElementById('root')!).render(

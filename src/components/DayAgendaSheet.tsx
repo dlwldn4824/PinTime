@@ -1,8 +1,16 @@
-import { Check, Plus, X } from 'lucide-react'
+import { Check, GripVertical, Plus, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  applyCustomOrder,
+  orderIdsForDate,
+  saveDayAgendaOrder,
+} from '../lib/dayAgendaOrder'
 import { toneOf } from '../lib/eventColors'
-import { expandSchedulesInRange } from '../lib/recurrence'
+import {
+  expandSchedulesInRange,
+  type ScheduleOccurrence,
+} from '../lib/recurrence'
 import {
   createTodo,
   loadTodos,
@@ -28,10 +36,25 @@ type DayAgendaSheetProps = {
   onSelectAllDay: (event: AllDayEvent) => void
 }
 
+type AgendaRow =
+  | { kind: 'allday'; key: string; event: AllDayEvent }
+  | { kind: 'timed'; key: string; occurrence: ScheduleOccurrence }
+
 function formatDateKo(dateKey: string) {
   const d = parseDateKey(dateKey)
   const day = weekdayOfDateKey(dateKey)
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${day})`
+}
+
+function timeSortRows(a: AgendaRow, b: AgendaRow) {
+  if (a.kind !== b.kind) return a.kind === 'allday' ? -1 : 1
+  if (a.kind === 'allday' && b.kind === 'allday') {
+    return a.event.title.localeCompare(b.event.title)
+  }
+  if (a.kind === 'timed' && b.kind === 'timed') {
+    return a.occurrence.start.localeCompare(b.occurrence.start)
+  }
+  return 0
 }
 
 export function DayAgendaSheet({
@@ -46,11 +69,16 @@ export function DayAgendaSheet({
 }: DayAgendaSheetProps) {
   const [todos, setTodos] = useState<TodoItem[]>(() => loadTodos().items)
   const [todoDraft, setTodoDraft] = useState('')
+  const [orderTick, setOrderTick] = useState(0)
+  const [dragKey, setDragKey] = useState<string | null>(null)
+  const [overKey, setOverKey] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
     setTodos(loadTodos().items)
     setTodoDraft('')
+    setDragKey(null)
+    setOverKey(null)
   }, [open, date])
 
   useEffect(() => {
@@ -59,33 +87,36 @@ export function DayAgendaSheet({
     return () => window.removeEventListener('pintime:todos', refresh)
   }, [])
 
-  const timed = useMemo(
-    () =>
-      expandSchedulesInRange(schedules, date, date).sort(
-        (a, b) => a.start.localeCompare(b.start),
-      ),
-    [schedules, date],
-  )
-
-  const days = useMemo(
-    () =>
-      allDay
-        .filter((e) => e.startDate <= date && e.endDate >= date)
-        .sort((a, b) => a.title.localeCompare(b.title)),
-    [allDay, date],
-  )
-
-  const dayTodos = useMemo(() => {
-    const daily = todos.filter((t) => t.kind === 'daily' && t.date === date)
-    const standing = todos.filter((t) => t.kind === 'standing')
-    return [...daily, ...standing].sort(
-      (a, b) => Number(a.done) - Number(b.done) || a.createdAt - b.createdAt,
+  const agendaRows = useMemo(() => {
+    const timed = expandSchedulesInRange(schedules, date, date)
+    const dayEvents = allDay.filter(
+      (e) => e.startDate <= date && e.endDate >= date,
     )
-  }, [todos, date])
+    const base: AgendaRow[] = [
+      ...dayEvents.map(
+        (event): AgendaRow => ({
+          kind: 'allday',
+          key: `allday:${event.id}`,
+          event,
+        }),
+      ),
+      ...timed.map(
+        (occurrence): AgendaRow => ({
+          kind: 'timed',
+          key: `timed:${occurrence.occurrenceId}`,
+          occurrence,
+        }),
+      ),
+    ].sort(timeSortRows)
+
+    void orderTick
+    const custom = orderIdsForDate(date)
+    return applyCustomOrder(base, (row) => row.key, custom)
+  }, [schedules, allDay, date, orderTick])
 
   if (!open) return null
 
-  const scheduleEmpty = timed.length === 0 && days.length === 0
+  const scheduleEmpty = agendaRows.length === 0
 
   const addDayTodo = () => {
     const text = todoDraft.trim()
@@ -97,6 +128,34 @@ export function DayAgendaSheet({
     setTodos(next.items)
     setTodoDraft('')
   }
+
+  const dayTodos = (() => {
+    const daily = todos.filter((t) => t.kind === 'daily' && t.date === date)
+    const standing = todos.filter((t) => t.kind === 'standing')
+    return [...daily, ...standing].sort(
+      (a, b) => Number(a.done) - Number(b.done) || a.createdAt - b.createdAt,
+    )
+  })()
+
+  const moveRow = (fromKey: string, toKey: string) => {
+    if (fromKey === toKey) return
+    const ids = agendaRows.map((r) => r.key)
+    const from = ids.indexOf(fromKey)
+    const to = ids.indexOf(toKey)
+    if (from < 0 || to < 0) return
+    const next = [...ids]
+    const [picked] = next.splice(from, 1)
+    next.splice(to, 0, picked)
+    saveDayAgendaOrder(date, next)
+    setOrderTick((n) => n + 1)
+  }
+
+  const resetTimeOrder = () => {
+    saveDayAgendaOrder(date, [])
+    setOrderTick((n) => n + 1)
+  }
+
+  const hasCustomOrder = (orderIdsForDate(date)?.length ?? 0) > 0
 
   return (
     <div
@@ -137,10 +196,25 @@ export function DayAgendaSheet({
         </div>
 
         <div className="pt-scroll min-h-0 flex-1 overflow-auto px-3 py-3">
-          {/* 일정 */}
-          <p className="mb-2 px-0.5 text-[10px] font-bold tracking-wide text-[var(--muted)] uppercase">
-            일정
-          </p>
+          <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
+            <p className="text-[10px] font-bold tracking-wide text-[var(--muted)] uppercase">
+              일정
+            </p>
+            {hasCustomOrder ? (
+              <button
+                type="button"
+                onClick={resetTimeOrder}
+                className="text-[10px] font-semibold text-[var(--tomato)] hover:underline"
+              >
+                시간순으로
+              </button>
+            ) : (
+              <span className="text-[10px] text-slate-400">
+                ⋮⋮ 잡고 순서 변경
+              </span>
+            )}
+          </div>
+
           {scheduleEmpty ? (
             <div className="mb-4 rounded-2xl border border-dashed border-[var(--line)] bg-[var(--bg)] px-4 py-6 text-center">
               <p className="text-sm font-semibold text-slate-600">
@@ -157,78 +231,119 @@ export function DayAgendaSheet({
             </div>
           ) : (
             <ul className="mb-4 space-y-2">
-              {days.map((e) => {
-                const tone = toneOf(e.color)
+              {agendaRows.map((row) => {
+                const tone =
+                  row.kind === 'allday'
+                    ? toneOf(row.event.color)
+                    : toneOf(row.occurrence.color)
+                const isOver = overKey === row.key && dragKey !== row.key
                 return (
-                  <li key={e.id}>
-                    <button
-                      type="button"
-                      onClick={() => onSelectAllDay(e)}
-                      className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:brightness-[0.98]"
+                  <li
+                    key={row.key}
+                    draggable
+                    onDragStart={(e) => {
+                      setDragKey(row.key)
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.dataTransfer.setData('text/plain', row.key)
+                    }}
+                    onDragEnd={() => {
+                      setDragKey(null)
+                      setOverKey(null)
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault()
+                      e.dataTransfer.dropEffect = 'move'
+                      if (overKey !== row.key) setOverKey(row.key)
+                    }}
+                    onDragLeave={() => {
+                      if (overKey === row.key) setOverKey(null)
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      const from =
+                        e.dataTransfer.getData('text/plain') || dragKey
+                      if (from) moveRow(from, row.key)
+                      setDragKey(null)
+                      setOverKey(null)
+                    }}
+                    className={`rounded-xl transition ${
+                      dragKey === row.key ? 'opacity-50' : ''
+                    } ${isOver ? 'ring-2 ring-[var(--tomato)]/40' : ''}`}
+                  >
+                    <div
+                      className="flex w-full items-start gap-1.5 rounded-xl px-2 py-2.5 text-left"
                       style={{ background: `${tone.solid}18` }}
                     >
-                      <span
-                        className="mt-1 h-8 w-1 shrink-0 rounded-full"
-                        style={{ background: tone.solid }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-semibold text-slate-500">
-                          하루 종일
-                          {e.startDate !== e.endDate
-                            ? ` · ${e.startDate} – ${e.endDate}`
-                            : ''}
-                        </p>
-                        <p
-                          className="truncate text-sm font-bold"
-                          style={{ color: tone.text }}
-                        >
-                          {e.title}
-                        </p>
-                      </div>
-                    </button>
-                  </li>
-                )
-              })}
-              {timed.map((s) => {
-                const tone = toneOf(s.color)
-                const master =
-                  schedules.find((x) => x.id === s.id) ?? (s as Schedule)
-                return (
-                  <li key={s.occurrenceId}>
-                    <button
-                      type="button"
-                      onClick={() => onSelectSchedule(master)}
-                      className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition hover:brightness-[0.98]"
-                      style={{ background: `${tone.solid}18` }}
-                    >
-                      <span
-                        className="mt-1 h-8 w-1 shrink-0 rounded-full"
-                        style={{ background: tone.solid }}
-                      />
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[10px] font-semibold text-slate-500">
-                          {s.start} – {s.end}
-                        </p>
-                        <p
-                          className="truncate text-sm font-bold"
-                          style={{ color: tone.text }}
-                        >
-                          {s.title}
-                        </p>
-                        {s.location && (
-                          <p className="mt-0.5 truncate text-[10px] text-slate-400">
-                            {s.location}
-                          </p>
-                        )}
-                      </div>
-                    </button>
+                      <button
+                        type="button"
+                        className="mt-1 shrink-0 cursor-grab touch-none rounded-md p-1 text-slate-400 hover:bg-black/5 hover:text-slate-600 active:cursor-grabbing"
+                        aria-label="순서 바꾸기"
+                        title="드래그해서 순서 바꾸기"
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        <GripVertical size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (row.kind === 'allday') {
+                            onSelectAllDay(row.event)
+                            return
+                          }
+                          const master =
+                            schedules.find((x) => x.id === row.occurrence.id) ??
+                            (row.occurrence as Schedule)
+                          onSelectSchedule(master)
+                        }}
+                        className="flex min-w-0 flex-1 items-start gap-3 text-left transition hover:brightness-[0.98]"
+                      >
+                        <span
+                          className="mt-1 h-8 w-1 shrink-0 rounded-full"
+                          style={{ background: tone.solid }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          {row.kind === 'allday' ? (
+                            <>
+                              <p className="text-[10px] font-semibold text-slate-500">
+                                하루 종일
+                                {row.event.startDate !== row.event.endDate
+                                  ? ` · ${row.event.startDate} – ${row.event.endDate}`
+                                  : ''}
+                              </p>
+                              <p
+                                className="truncate text-sm font-bold"
+                                style={{ color: tone.text }}
+                              >
+                                {row.event.title}
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-[10px] font-semibold text-slate-500">
+                                {row.occurrence.start} – {row.occurrence.end}
+                              </p>
+                              <p
+                                className="truncate text-sm font-bold"
+                                style={{ color: tone.text }}
+                              >
+                                {row.occurrence.title}
+                              </p>
+                              {row.occurrence.location && (
+                                <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                                  {row.occurrence.location}
+                                </p>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </button>
+                    </div>
                   </li>
                 )
               })}
             </ul>
           )}
 
-          {/* 할 일 */}
           <div className="mb-2 flex items-center justify-between gap-2 px-0.5">
             <p className="text-[10px] font-bold tracking-wide text-[var(--muted)] uppercase">
               할 일

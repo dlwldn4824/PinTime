@@ -4,10 +4,11 @@ import { Link, Navigate, Route, Routes } from 'react-router-dom'
 import { AnalyticsRouteTracker } from './components/AnalyticsRouteTracker'
 import { AppSidebar } from './components/AppSidebar'
 import { BottomNav } from './components/BottomNav'
+import { PinTimeLogo } from './components/PinTimeLogo'
 import { CalendarProvider } from './context/CalendarContext'
+import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { isDesktopPinMode, shouldRenderDesktopPin } from './lib/platform'
-import { AgentPage } from './pages/AgentPage'
 import { CalendarPage } from './pages/CalendarPage'
 import { DesktopPinPage } from './pages/DesktopPinPage'
 import { JoinPage } from './pages/JoinPage'
@@ -90,15 +91,15 @@ function JoinShell({ children }: { children: React.ReactNode }) {
           className="flex items-center gap-2.5 sm:gap-3 transition hover:opacity-90"
           aria-label="홈으로 이동"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[var(--main)] text-sm font-bold text-[var(--pin-text)] sm:h-9 sm:w-9">
-            P
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-[var(--line)] sm:h-9 sm:w-9">
+            <PinTimeLogo size={36} className="rounded-xl" />
           </div>
           <div className="min-w-0">
             <h1 className="truncate text-sm font-bold text-[var(--ink)]">
               PinTime
             </h1>
             <p className="truncate text-[11px] text-[var(--muted)]">
-              공유 참여 · TimePick
+              공유 참여
             </p>
           </div>
         </Link>
@@ -112,74 +113,70 @@ export default function App() {
   if (shouldRenderDesktopPin()) {
     return (
       <ThemeProvider>
-        <CalendarProvider>
-          <DesktopPinPage />
-        </CalendarProvider>
+        <AuthProvider>
+          <CalendarProvider>
+            <DesktopPinPage />
+          </CalendarProvider>
+        </AuthProvider>
       </ThemeProvider>
     )
   }
 
   // 브라우저에서 ?mode=desktop-pin 잠금 방지
   if (isDesktopPinMode()) {
-    return <Navigate to="/calendar" replace />
+    return <Navigate to="/" replace />
   }
 
   return (
     <ThemeProvider>
-      <CalendarProvider>
-        <AnalyticsRouteTracker />
-        {/* 선택 원 가장자리 텍스처 필터 */}
-        <svg
-          aria-hidden
-          width="0"
-          height="0"
-          className="pointer-events-none absolute"
-          style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
-        >
-          <defs>
-            <filter
-              id="pt-tomato-edge"
-              x="-40%"
-              y="-40%"
-              width="180%"
-              height="180%"
-              colorInterpolationFilters="sRGB"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.9"
-                numOctaves="3"
-                seed="7"
-                result="noise"
-              />
-              <feDisplacementMap
-                in="SourceGraphic"
-                in2="noise"
-                scale="2"
-                xChannelSelector="R"
-                yChannelSelector="G"
-              />
-              <feGaussianBlur stdDeviation="0.25" />
-            </filter>
-          </defs>
-        </svg>
-        <Routes>
+      <AuthProvider>
+        <CalendarProvider>
+          <AnalyticsRouteTracker />
+          {/* 선택 원 가장자리 텍스처 필터 */}
+          <svg
+            aria-hidden
+            width="0"
+            height="0"
+            className="pointer-events-none absolute"
+            style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
+          >
+            <defs>
+              <filter
+                id="pt-tomato-edge"
+                x="-40%"
+                y="-40%"
+                width="180%"
+                height="180%"
+                colorInterpolationFilters="sRGB"
+              >
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.9"
+                  numOctaves="3"
+                  seed="7"
+                  result="noise"
+                />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="noise"
+                  scale="2"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+                <feGaussianBlur stdDeviation="0.25" />
+              </filter>
+            </defs>
+          </svg>
+          <Routes>
           <Route
             path="/"
-            element={
-              <Shell>
-                <AgentPage />
-              </Shell>
-            }
-          />
-          <Route
-            path="/calendar"
             element={
               <Shell>
                 <CalendarPage />
               </Shell>
             }
           />
+          <Route path="/calendar" element={<Navigate to="/" replace />} />
           <Route
             path="/share"
             element={
@@ -212,9 +209,18 @@ export default function App() {
               </JoinShell>
             }
           />
+          <Route
+            path="/j/:roomId"
+            element={
+              <JoinShell>
+                <JoinPage />
+              </JoinShell>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </CalendarProvider>
+        </CalendarProvider>
+      </AuthProvider>
     </ThemeProvider>
   )
 }

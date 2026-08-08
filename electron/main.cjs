@@ -210,6 +210,12 @@ ipcMain.handle('pintime:platform', () => ({
   desktopPinOpen: !!(pinWindow && !pinWindow.isDestroyed()),
 }))
 
+ipcMain.handle('pintime:open-external', async (_evt, url) => {
+  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) return false
+  await shell.openExternal(url)
+  return true
+})
+
 ipcMain.handle('desktop-pin:open', () => {
   createPinWindow()
   return true
